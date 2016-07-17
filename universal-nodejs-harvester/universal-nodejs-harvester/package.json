@@ -1,0 +1,9 @@
+{
+  "name": "universal-nodejs-harvester",
+  "version": "0.0.1",
+  "description": "universal-nodejs-harvester",
+  "main": "app.js",
+  "author": {
+    "name": "chris"
+  }
+}
