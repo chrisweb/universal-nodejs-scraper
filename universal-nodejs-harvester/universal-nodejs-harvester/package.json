@@ -5,5 +5,9 @@
   "main": "app.js",
   "author": {
     "name": "chris"
+  },
+  "dependencies": {
+    "cheerio": "0.20.0",
+    "json2csv": "3.6.1"
   }
 }
