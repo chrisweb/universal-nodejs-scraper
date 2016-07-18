@@ -3,11 +3,29 @@
   "version": "0.0.1",
   "description": "universal-nodejs-harvester",
   "main": "app.js",
-  "author": {
-    "name": "chris"
-  },
+  "author": "chris",
   "dependencies": {
     "cheerio": "0.20.0",
-    "json2csv": "3.6.1"
-  }
+    "json2csv": "3.6.1",
+    "lodash": "4.13.1",
+    "chrisweb-utilities": "git://github.com/chrisweb/chrisweb-utilities.js.git#0.1.4"
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chrisweb/universal-nodejs-harvester.git"
+  },
+  "keywords": [
+    "harvester",
+    "scrapper",
+    "nodejs"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/chrisweb/universal-nodejs-harvester/issues"
+  },
+  "homepage": "https://github.com/chrisweb/universal-nodejs-harvester#readme"
 }

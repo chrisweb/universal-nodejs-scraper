@@ -10,16 +10,27 @@ let cheerio = require('cheerio');
 // https://github.com/zemirco/json2csv
 let json2csv = require('json2csv');
 
-let urlToScrap = 'http://www.gamescom-cologne.com/gamescom/exhibitor-search/index.php';
-let detailsUrlDomain = 'http://www.gamescom-cologne.com';
+// https://github.com/lodash/lodash
+let _ = require('lodash');
 
-let scrap = function () {
+// https://github.com/chrisweb/chrisweb-utilities.js
+let utilities = require('chrisweb-utilities');
+
+let pageCounter = 1;
+
+let scrap = function (urlToScrap, callback) {
 
     request(urlToScrap, function (error, response, html) {
 
         if (!error && response.statusCode == 200) {
 
+            utilities.log('finished harvesting page ' + pageCounter + ' now extracting metadata ...', 'fontColor:blue');
+
+            pageCounter++;
+
             let $ = cheerio.load(html);
+
+            let domainToScrap = 'http://www.gamescom-cologne.com';
 
             let parsedResults = [];
 
@@ -38,16 +49,16 @@ let scrap = function () {
                 let $countryColumn = $element.find('.cspacer.ca4');
                 let $hallsColumn = $element.find('.cspacer.ca5');
                 let $boothsColumn = $element.find('.cspacer.ca6');
-
+                
                 let $titleColumnLink = $titleColumn.find('a');
-                let detailsUrl = detailsUrlDomain + $titleColumnLink.prop('href');
+                let detailsUrl = domainToScrap + $titleColumnLink.prop('href');
                 let name = $titleColumnLink.text().trim();
 
                 let country = $countryColumn.text().trim();
 
-                let halls = $hallsColumn.text().trim().replace(/<br>/g, ' ');
+                let halls = $hallsColumn.text().trim().replace(/<br>/g, ' / ');
 
-                let booths = $boothsColumn.text().trim().replace(/<br>/g, ' ');
+                let booths = $boothsColumn.text().trim().replace(/<br>/g, ' / ');
 
                 // metadata
                 var metadata = {
@@ -61,35 +72,37 @@ let scrap = function () {
                 parsedResults.push(metadata);
 
             });
+            
+            // find links to other pages (through pagination)
+            let $pager = $body.find('.pager');
+            let $lastLinkElement = $pager.find('a').last();
+            let lastLinkUrl = $lastLinkElement.prop('href');
 
+            let nextPageUrl = null;
+            let lastLinkContent = parseInt($lastLinkElement.text().trim());
 
-            console.log(parsedResults);
+            // if the content of the last link last link is NaN it means that
+            // it contains an arrow image, so we have a next page, otherweise
+            // if it is numeric it means we have reached the end
+            if (_.isNaN(lastLinkContent)) {
+                nextPageUrl = domainToScrap + lastLinkUrl;
+            }
 
-            saveAsCSV(parsedResults);
+            callback(null, parsedResults, nextPageUrl);
+
+        } else {
+
+            callback(error, []);
 
         }
-
-
 
     });
 
 };
 
-let saveAsCSV = function (json) {
+let saveAsCSV = function (results, fields) {
 
-    
-
-    /*var json = [
-        {
-            "url": "Audi",
-            "title": 40000
-        }
-    ];*/
-
-    //let fields = ['name', 'country', 'halls', 'booths', 'website', 'email'];
-    let fields = ['name', 'country', 'halls', 'booths'];
-
-    json2csv({ data: json, fields: fields }, function (error, csv) {
+    json2csv({ data: results, fields: fields }, function (error, csv) {
 
         if (error) {
 
@@ -101,11 +114,11 @@ let saveAsCSV = function (json) {
 
                 if (error) {
 
-                    console.log(error);
+                    utilities.log(error, 'fontColor:red');
 
                 } else {
 
-                    console.log('file saved');
+                    utilities.log('file saved / job done :)', 'fontColor:green');
 
                 }
 
@@ -117,4 +130,46 @@ let saveAsCSV = function (json) {
 
 };
 
-scrap();
+let createFile = function (results) {
+
+    //let fields = ['name', 'country', 'halls', 'booths', 'website', 'email'];
+    let fields = _.keys(results[0]);
+
+    saveAsCSV(results, fields);
+
+};
+
+let results = [];
+
+let execute = function (startUrlToScrap) {
+    
+    scrap(startUrlToScrap, function (error, parsedResults, nextPageUrl) {
+
+        if (!error) {
+
+            _.union(results, parsedResults);
+
+            if (!_.isNull(nextPageUrl)) {
+
+                // wait 5 seconds then do next call
+                setTimeout(() => {
+                    execute(nextPageUrl)
+                }, 5000);
+
+            } else {
+
+                createFile(results);
+
+            }
+
+        }
+
+    });
+
+};
+
+utilities.log('scrapping started', 'fontColor:green');
+
+let startUrlToScrap = 'http://www.gamescom-cologne.com/gamescom/exhibitor-search/index.php';
+
+execute(startUrlToScrap);
