@@ -42,7 +42,16 @@ let scrapDetails = function (urlToScrap, callback) {
                 let $columns = $element.find('td');
                 let $secondColumn = $columns.eq(1);
 
-                let secondColumnContent = $secondColumn.text().replace(/\\t/g, '').replace(/\s+/g, '').trim();
+                let secondColumnContentRaw = $secondColumn.text();
+                
+                // remove all spaces and tabs but keep \r and \n
+                // trim removes spaces and line breaks if they are at the beginning or end,
+                // so no regex needed for this
+                let secondColumnContentNoSpace = secondColumnContentRaw.replace(/[ \t]/g, '').trim();
+
+                // apple uses \r for linebreaks, linux \n and windows \r\n
+                // remove all but one \n or all but one \r or all but one \r\n
+                let secondColumnContent = secondColumnContentNoSpace.replace(/(\r\n?|\n){2,}/g, '$1');
 
                 switch (index) {
                     case 1:
@@ -106,7 +115,7 @@ let scrap = function (urlToScrap, callback) {
 
             $allRows.each(function (index, element) {
 
-                // wait 2 seconds then do next call
+                // wait 1 second then do next call
                 setTimeout(() => {
 
                     let $element = $(element);
@@ -173,7 +182,7 @@ let scrap = function (urlToScrap, callback) {
 
                     });
 
-                }, index*2000);
+                }, index*1000);
 
             });
 
@@ -238,10 +247,10 @@ let execute = function (startUrlToScrap) {
 
             if (!_.isNull(nextPageUrl)) {
 
-                // wait 2 seconds then do next call
+                // wait 1 second then do next call
                 setTimeout(() => {
                     execute(nextPageUrl);
-                }, 2000);
+                }, 1000);
 
             } else {
 

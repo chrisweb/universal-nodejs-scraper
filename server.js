@@ -27,7 +27,14 @@ var scrapDetails = function (urlToScrap, callback) {
                 var $element = $(element);
                 var $columns = $element.find('td');
                 var $secondColumn = $columns.eq(1);
-                var secondColumnContent = $secondColumn.text().replace(/\\t/g, '').replace(/\s+/g, '').trim();
+                var secondColumnContentRaw = $secondColumn.text();
+                // remove all spaces and tabs but keep \r and \n
+                // trim removes spaces and line breaks if they are at the beginning or end,
+                // so no regex needed for this
+                var secondColumnContentNoSpace = secondColumnContentRaw.replace(/[ \t]/g, '').trim();
+                // apple uses \r for linebreaks, linux \n and windows \r\n
+                // remove all but one \n or all but one \r or all but one \r\n
+                var secondColumnContent = secondColumnContentNoSpace.replace(/(\r\n?|\n){2,}/g, '$1');
                 switch (index) {
                     case 1:
                         result['address'] = secondColumnContent || '';
@@ -69,7 +76,7 @@ var scrap = function (urlToScrap, callback) {
             var $allRows = $tableBody.children('tr');
             var allRowsLength = $allRows.length;
             $allRows.each(function (index, element) {
-                // wait 2 seconds then do next call
+                // wait 1 second then do next call
                 setTimeout(function () {
                     var $element = $(element);
                     var $titleColumn = $element.find('.cspacer.ca3');
@@ -115,7 +122,7 @@ var scrap = function (urlToScrap, callback) {
                             callback(error, []);
                         }
                     });
-                }, index * 2000);
+                }, index * 1000);
             });
         }
         else {
@@ -151,10 +158,10 @@ var execute = function (startUrlToScrap) {
         if (!error) {
             results = _.union(results, parsedResults);
             if (!_.isNull(nextPageUrl)) {
-                // wait 2 seconds then do next call
+                // wait 1 second then do next call
                 setTimeout(function () {
                     execute(nextPageUrl);
-                }, 2000);
+                }, 1000);
             }
             else {
                 createFile(results);
