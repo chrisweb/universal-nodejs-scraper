@@ -28,13 +28,18 @@ var scrapDetails = function (urlToScrap, callback) {
                 var $columns = $element.find('td');
                 var $secondColumn = $columns.eq(1);
                 var secondColumnContentRaw = $secondColumn.text();
-                // remove all spaces and tabs but keep \r and \n
-                // trim removes spaces and line breaks if they are at the beginning or end,
+                // 1) remove all spaces and tabs but keep \r and \n
+                // 2) remove multiple spaces and keep just one
+                // 3) trim removes spaces and line breaks if they are at the beginning or end,
                 // so no regex needed for this
-                var secondColumnContentNoSpace = secondColumnContentRaw.replace(/[ \t]/g, '').trim();
+                var secondColumnContentNoSpace = secondColumnContentRaw.replace(/[\t]/g, '').replace(/  +/g, ' ').trim();
                 // apple uses \r for linebreaks, linux \n and windows \r\n
-                // remove all but one \n or all but one \r or all but one \r\n
-                var secondColumnContent = secondColumnContentNoSpace.replace(/(\r\n?|\n){2,}/g, '$1');
+                // replace all \n, all \r and all \r\n by <br>
+                // replace multiple <br> with an optional space in front or after them with \u2028
+                // json stringify won't escape \u2028 (which is LS)
+                // if we would use \n it would get escaped
+                // below before writing the csv we will convert the \u2028 back to \n
+                var secondColumnContent = secondColumnContentNoSpace.replace(/(\r\n?|\n)/g, '<br>').replace(/( ?<br\s*\/?> ?){1,}/gi, '\u2028');
                 switch (index) {
                     case 1:
                         result['address'] = secondColumnContent || '';
@@ -132,6 +137,11 @@ var scrap = function (urlToScrap, callback) {
 };
 var saveAsCSV = function (results, fields) {
     json2csv({ data: results, fields: fields }, function (error, csv) {
+        // now we need to convert the \u2028 to \n
+        // in json we used \u2028 because JSON.stringify won't escape it
+        // but now we use \n before writing the csv to disk
+        // TODO: would it be better to use os.EOL instead of hardcoded \n ?
+        csv = csv.replace(/\u2028/g, '\n');
         if (error) {
             console.log(error);
         }
@@ -148,7 +158,6 @@ var saveAsCSV = function (results, fields) {
     });
 };
 var createFile = function (results) {
-    //let fields = ['name', 'country', 'halls', 'booths', 'website', 'email'];
     var fields = _.keys(results[0]);
     saveAsCSV(results, fields);
 };
