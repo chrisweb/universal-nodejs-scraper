@@ -1,21 +1,27 @@
-﻿// nodejs request module
+﻿/// <reference path="node_modules/json2csv/index.d.ts" />
+/// <reference path="node_modules/@types/cheerio/index.d.ts" />
+/// <reference path="node_modules/@types/lodash/index.d.ts" />
+
+// nodejs request module
 let request = require('request');
 
 // nodejs request module
 let fs = require('fs');
 
 // https://github.com/cheeriojs/cheerio
-let cheerio = require('cheerio');
+import * as cheerio from 'cheerio';
 
 // https://github.com/zemirco/json2csv
 let json2csv = require('json2csv');
+//import * as json2csv from 'json2csv';
 
 // https://github.com/lodash/lodash
-let _ = require('lodash');
+import * as _ from 'lodash';
 
 // https://github.com/chrisweb/chrisweb-utilities.js
 let utilities = require('chrisweb-utilities');
 
+/*
 let scrapDetails = function (urlToScrap, callback) {
 
     request(urlToScrap, function (error, response, html) {
@@ -43,20 +49,8 @@ let scrapDetails = function (urlToScrap, callback) {
                 let $secondColumn = $columns.eq(1);
 
                 let secondColumnContentRaw = $secondColumn.text();
-                
-                // 1) remove all spaces and tabs but keep \r and \n
-                // 2) remove multiple spaces and keep just one
-                // 3) trim removes spaces and line breaks if they are at the beginning or end,
-                // so no regex needed for this
-                let secondColumnContentNoSpace = secondColumnContentRaw.replace(/[\t]/g, '').replace(/  +/g, ' ').trim();
 
-                // apple uses \r for linebreaks, linux \n and windows \r\n
-                // replace all \n, all \r and all \r\n by <br>
-                // replace multiple <br> with an optional space in front or after them with \u2028
-                // json stringify won't escape \u2028 (which is LS)
-                // if we would use \n it would get escaped
-                // below before writing the csv we will convert the \u2028 back to \n
-                let secondColumnContent = secondColumnContentNoSpace.replace(/(\r\n?|\n)/g, '<br>').replace(/( ?<br\s*\/?> ?){1,}/gi, '\u2028');
+                let secondColumnContent = sanitizeString(secondColumnContentRaw);
 
                 switch (index) {
                     case 1:
@@ -90,6 +84,27 @@ let scrapDetails = function (urlToScrap, callback) {
     });
 
 };
+*/
+
+let sanitizeString = function santizeStringFunction(input) {
+
+    // 1) remove all spaces and tabs but keep \r and \n
+    // 2) remove multiple spaces and keep just one
+    // 3) trim removes spaces and line breaks if they are at the beginning or end,
+    // so no regex needed for this
+    let inputNoSpace = input.replace(/[\t]/g, '').replace(/  +/g, ' ').trim();
+
+    // apple uses \r for linebreaks, linux \n and windows \r\n
+    // replace all \n, all \r and all \r\n by <br>
+    // replace multiple <br> with an optional space in front or after them with \u2028
+    // json stringify won't escape \u2028 (which is LS)
+    // if we would use \n it would get escaped
+    // below before writing the csv we will convert the \u2028 back to \n
+    let output = inputNoSpace.replace(/(\r\n?|\n)/g, '<br>').replace(/( ?<br\s*\/?> ?){1,}/gi, '\u2028');
+
+    return output;
+
+};
 
 let pageCounter = 1;
 
@@ -104,12 +119,16 @@ let scrap = function (urlToScrap, callback) {
             pageCounter++;
 
             let $ = cheerio.load(html);
-
-            let domainToScrap = 'http://www.gamescom-cologne.com';
-
+            
             let parsedResults = [];
 
             let $body = $('body');
+
+
+
+
+
+            /*let domainToScrap = 'http://www..com';
 
             let $elementWithId = $body.find('#ausform');
             let $table = $('#ausform').find('table');
@@ -186,10 +205,10 @@ let scrap = function (urlToScrap, callback) {
                         }
 
                     });
-
+                
                 }, index*1000);
 
-            });
+            });*/
 
         } else {
 
@@ -245,26 +264,63 @@ let createFile = function (results) {
 
 };
 
-let results = [];
+var save = function saveFunction(results) {
 
-let execute = function (startUrlToScrap) {
+    // save the scrapping result
+    switch (scrapOptions.save) {
+        case 'csv':
+            createFile(results);
+            break;
+    }
+
+}
+
+let results = [];
+let pagesCount = 0;
+
+let execute = function (scrapUrl) {
     
-    scrap(startUrlToScrap, function (error, parsedResults, nextPageUrl) {
+    scrap(scrapOptions.url, function (error, parsedResults, nextPageUrl) {
 
         if (!error) {
 
             results = _.union(results, parsedResults);
 
+            // if there is no next page no need to go on scrapping
             if (!_.isNull(nextPageUrl)) {
 
-                // wait 1 second then do next call
-                setTimeout(() => {
-                    execute(nextPageUrl);
-                }, 1000);
+                pagesCount++;
+
+                let scrapOn = false;
+
+                // continue scrapping if the amount of scrapped pages
+                // is below the amount defined in the options or if 
+                // no limit got defined at all
+                if (
+                    'count' in scrapOptions.pagination
+                    && pagesCount < scrapOptions.pagination.count
+                ) {
+                    scrapOn = true;
+                } else if (!('count' in scrapOptions.pagination)) {
+                    scrapOn = true;
+                }
+
+                if (scrapOn) {
+
+                    // wait 1 second then do next call
+                    setTimeout(() => {
+                        execute(nextPageUrl);
+                    }, 1000);
+
+                } else {
+
+                    save(results);
+
+                }
 
             } else {
 
-                createFile(results);
+                save(results);
 
             }
 
@@ -276,6 +332,12 @@ let execute = function (startUrlToScrap) {
 
 utilities.log('scrapping started', 'fontColor:green');
 
-let startUrlToScrap = 'http://www.gamescom-cologne.com/gamescom/exhibitor-search/index.php';
+let scrapOptions = {
+    url: 'https://news.ycombinator.com/',
+    pagination: {
+        count: 10
+    },
+    save: 'csv'
+};
 
-execute(startUrlToScrap);
+execute(scrapOptions.url);

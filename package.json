@@ -5,10 +5,12 @@
   "main": "app.js",
   "author": "chris",
   "dependencies": {
+    "@types/cheerio": "^0.17.29",
+    "@types/lodash": "0.0.29",
     "cheerio": "0.20.0",
+    "chrisweb-utilities": "git://github.com/chrisweb/chrisweb-utilities.js.git#0.1.4",
     "json2csv": "3.6.1",
-    "lodash": "4.13.1",
-    "chrisweb-utilities": "git://github.com/chrisweb/chrisweb-utilities.js.git#0.1.4"
+    "lodash": "4.13.1"
   },
   "scripts": {
     "start": "node server.js"

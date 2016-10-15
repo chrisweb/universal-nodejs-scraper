@@ -1,3 +1,7 @@
+/// <reference path="node_modules/json2csv/index.d.ts" />
+/// <reference path="node_modules/@types/cheerio/index.d.ts" />
+/// <reference path="node_modules/@types/lodash/index.d.ts" />
+"use strict";
 // nodejs request module
 var request = require('request');
 // nodejs request module
@@ -6,40 +10,42 @@ var fs = require('fs');
 var cheerio = require('cheerio');
 // https://github.com/zemirco/json2csv
 var json2csv = require('json2csv');
+//import * as json2csv from 'json2csv';
 // https://github.com/lodash/lodash
 var _ = require('lodash');
 // https://github.com/chrisweb/chrisweb-utilities.js
 var utilities = require('chrisweb-utilities');
-var scrapDetails = function (urlToScrap, callback) {
+/*
+let scrapDetails = function (urlToScrap, callback) {
+
     request(urlToScrap, function (error, response, html) {
+
         if (!error && response.statusCode == 200) {
+
             utilities.log('finished harvesting details, now extracting metadata ...', 'fontColor:yellow');
-            var $ = cheerio.load(html);
-            var result = {};
-            var $body = $('body');
-            var $mainContent = $body.find('.maincontent');
-            var $rowsChildren = $mainContent.children('.row');
-            var $thirdRow = $rowsChildren.eq(2);
-            var $detailsTable = $thirdRow.find('table');
+
+            let $ = cheerio.load(html);
+
+            let result = {};
+
+            let $body = $('body');
+            let $mainContent = $body.find('.maincontent');
+            let $rowsChildren = $mainContent.children('.row');
+            let $thirdRow = $rowsChildren.eq(2);
+            let $detailsTable = $thirdRow.find('table');
             //let $detailsTableBody = $detailsTable.find('tbody');
-            var $tableRows = $detailsTable.children('tr');
+            let $tableRows = $detailsTable.children('tr');
+
             $tableRows.each(function (index, element) {
-                var $element = $(element);
-                var $columns = $element.find('td');
-                var $secondColumn = $columns.eq(1);
-                var secondColumnContentRaw = $secondColumn.text();
-                // 1) remove all spaces and tabs but keep \r and \n
-                // 2) remove multiple spaces and keep just one
-                // 3) trim removes spaces and line breaks if they are at the beginning or end,
-                // so no regex needed for this
-                var secondColumnContentNoSpace = secondColumnContentRaw.replace(/[\t]/g, '').replace(/  +/g, ' ').trim();
-                // apple uses \r for linebreaks, linux \n and windows \r\n
-                // replace all \n, all \r and all \r\n by <br>
-                // replace multiple <br> with an optional space in front or after them with \u2028
-                // json stringify won't escape \u2028 (which is LS)
-                // if we would use \n it would get escaped
-                // below before writing the csv we will convert the \u2028 back to \n
-                var secondColumnContent = secondColumnContentNoSpace.replace(/(\r\n?|\n)/g, '<br>').replace(/( ?<br\s*\/?> ?){1,}/gi, '\u2028');
+
+                let $element = $(element);
+                let $columns = $element.find('td');
+                let $secondColumn = $columns.eq(1);
+
+                let secondColumnContentRaw = $secondColumn.text();
+
+                let secondColumnContent = sanitizeString(secondColumnContentRaw);
+
                 switch (index) {
                     case 1:
                         result['address'] = secondColumnContent || '';
@@ -57,13 +63,36 @@ var scrapDetails = function (urlToScrap, callback) {
                         result['website'] = secondColumnContent || '';
                         break;
                 }
+
             });
+
             callback(null, result);
-        }
-        else {
+
+        } else {
+
             callback(error, '');
+
         }
+
+
     });
+
+};
+*/
+var sanitizeString = function santizeStringFunction(input) {
+    // 1) remove all spaces and tabs but keep \r and \n
+    // 2) remove multiple spaces and keep just one
+    // 3) trim removes spaces and line breaks if they are at the beginning or end,
+    // so no regex needed for this
+    var inputNoSpace = input.replace(/[\t]/g, '').replace(/  +/g, ' ').trim();
+    // apple uses \r for linebreaks, linux \n and windows \r\n
+    // replace all \n, all \r and all \r\n by <br>
+    // replace multiple <br> with an optional space in front or after them with \u2028
+    // json stringify won't escape \u2028 (which is LS)
+    // if we would use \n it would get escaped
+    // below before writing the csv we will convert the \u2028 back to \n
+    var output = inputNoSpace.replace(/(\r\n?|\n)/g, '<br>').replace(/( ?<br\s*\/?> ?){1,}/gi, '\u2028');
+    return output;
 };
 var pageCounter = 1;
 var scrap = function (urlToScrap, callback) {
@@ -72,63 +101,8 @@ var scrap = function (urlToScrap, callback) {
             utilities.log('finished harvesting page ' + pageCounter + ' now extracting metadata ...', 'fontColor:blue');
             pageCounter++;
             var $ = cheerio.load(html);
-            var domainToScrap = 'http://www.gamescom-cologne.com';
             var parsedResults = [];
             var $body = $('body');
-            var $elementWithId = $body.find('#ausform');
-            var $table = $('#ausform').find('table');
-            var $tableBody = $table.find('tbody');
-            var $allRows = $tableBody.children('tr');
-            var allRowsLength = $allRows.length;
-            $allRows.each(function (index, element) {
-                // wait 1 second then do next call
-                setTimeout(function () {
-                    var $element = $(element);
-                    var $titleColumn = $element.find('.cspacer.ca3');
-                    var $countryColumn = $element.find('.cspacer.ca4');
-                    var $hallsColumn = $element.find('.cspacer.ca5');
-                    var $boothsColumn = $element.find('.cspacer.ca6');
-                    var $titleColumnLink = $titleColumn.find('a');
-                    var detailsUrl = domainToScrap + $titleColumnLink.prop('href');
-                    var name = $titleColumnLink.text().trim();
-                    var country = $countryColumn.text().trim();
-                    var halls = $hallsColumn.html().trim().replace(/<br>/g, ' / ').replace(/&#xA0;/g, ' ');
-                    var booths = $boothsColumn.html().trim().replace(/<br>/g, ' / ').replace(/&#xA0;/g, ' ');
-                    // metadata
-                    var coreMetadata = {
-                        name: name,
-                        country: country,
-                        halls: halls,
-                        booths: booths
-                    };
-                    // now scrap the details page
-                    // TODO: there should only be one scrapper
-                    scrapDetails(detailsUrl, function (error, detailsMetadata) {
-                        if (!error) {
-                            var metadata = _.assign(coreMetadata, detailsMetadata);
-                            parsedResults.push(metadata);
-                            if (index === allRowsLength - 1) {
-                                // find links to other pages (through pagination)
-                                var $pager = $body.find('.pager');
-                                var $lastLinkElement = $pager.find('a').last();
-                                var lastLinkUrl = $lastLinkElement.prop('href');
-                                var nextPageUrl = null;
-                                var lastLinkContent = parseInt($lastLinkElement.text().trim());
-                                // if the content of the last link last link is NaN it means that
-                                // it contains an arrow image, so we have a next page, otherweise
-                                // if it is numeric it means we have reached the end
-                                if (_.isNaN(lastLinkContent)) {
-                                    nextPageUrl = domainToScrap + lastLinkUrl;
-                                }
-                                callback(null, parsedResults, nextPageUrl);
-                            }
-                        }
-                        else {
-                            callback(error, []);
-                        }
-                    });
-                }, index * 1000);
-            });
         }
         else {
             callback(error, []);
@@ -161,24 +135,57 @@ var createFile = function (results) {
     var fields = _.keys(results[0]);
     saveAsCSV(results, fields);
 };
+var save = function saveFunction(results) {
+    // save the scrapping result
+    switch (scrapOptions.save) {
+        case 'csv':
+            createFile(results);
+            break;
+    }
+};
 var results = [];
-var execute = function (startUrlToScrap) {
-    scrap(startUrlToScrap, function (error, parsedResults, nextPageUrl) {
+var pagesCount = 0;
+var execute = function (scrapUrl) {
+    scrap(scrapOptions.url, function (error, parsedResults, nextPageUrl) {
         if (!error) {
             results = _.union(results, parsedResults);
+            // if there is no next page no need to go on scrapping
             if (!_.isNull(nextPageUrl)) {
-                // wait 1 second then do next call
-                setTimeout(function () {
-                    execute(nextPageUrl);
-                }, 1000);
+                pagesCount++;
+                var scrapOn = false;
+                // continue scrapping if the amount of scrapped pages
+                // is below the amount defined in the options or if 
+                // no limit got defined at all
+                if ('count' in scrapOptions.pagination
+                    && pagesCount < scrapOptions.pagination.count) {
+                    scrapOn = true;
+                }
+                else if (!('count' in scrapOptions.pagination)) {
+                    scrapOn = true;
+                }
+                if (scrapOn) {
+                    // wait 1 second then do next call
+                    setTimeout(function () {
+                        execute(nextPageUrl);
+                    }, 1000);
+                }
+                else {
+                    save(results);
+                }
             }
             else {
-                createFile(results);
+                save(results);
             }
         }
     });
 };
 utilities.log('scrapping started', 'fontColor:green');
-var startUrlToScrap = 'http://www.gamescom-cologne.com/gamescom/exhibitor-search/index.php';
-execute(startUrlToScrap);
+var scrapOptions = {
+    url: 'https://news.ycombinator.com/',
+    pagination: {
+        count: 10
+    },
+    save: 'csv'
+};
+execute(scrapOptions.url);
 //# sourceMappingURL=server.js.map
