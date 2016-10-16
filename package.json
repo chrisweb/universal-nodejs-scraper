@@ -2,8 +2,26 @@
   "name": "universal-nodejs-harvester",
   "version": "0.0.1",
   "description": "universal-nodejs-harvester",
-  "main": "app.js",
-  "author": "chris",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+	"start": "node start",
+	"build": "gulp build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chrisweb/universal-nodejs-scraper.git"
+  },
+  "private": true,
+  "author": "chrisweb <chris963@gmail.com> (https://chris.lu)",
+  "keywords": [
+    "scrapper",
+    "nodejs"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/chrisweb/universal-nodejs-scraper/issues"
+  },
+  "homepage": "https://github.com/chrisweb/universal-nodejs-scraper#readme",
   "dependencies": {
     "@types/cheerio": "^0.17.29",
     "@types/lodash": "0.0.29",
@@ -12,22 +30,16 @@
     "json2csv": "3.6.1",
     "lodash": "4.13.1"
   },
-  "scripts": {
-    "start": "node server.js"
+  "devDependencies": {
+    "@types/node": "^6.0.41",
+	"gulp": "^3.8.8",
+	"gulp-typescript": "^3.0.2",
+	"merge2": "^1.0.2",
+	"gulp-tslint": "^6.1.1",
+	"tslint": "^3.15.0-dev.0",
+	"typescript": "^2.0.3"
   },
-  "devDependencies": {},
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/chrisweb/universal-nodejs-harvester.git"
-  },
-  "keywords": [
-    "harvester",
-    "scrapper",
-    "nodejs"
-  ],
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/chrisweb/universal-nodejs-harvester/issues"
-  },
-  "homepage": "https://github.com/chrisweb/universal-nodejs-harvester#readme"
+  "engines": {
+    "node": ">= 5.4.1 < 7"
+  }
 }
