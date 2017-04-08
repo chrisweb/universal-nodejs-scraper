@@ -11,14 +11,13 @@ gulp.task('lint', ['check-tests', 'format:enforce', 'tools:build'], () => {
   const tslint = require('gulp-tslint');
   // Built-in rules are at
   // https://github.com/palantir/tslint#supported-rules
-  const tslintConfig = require('./tslint.json');
   return gulp
       .src([
         'source/**/*.ts'
       ])
       .pipe(tslint({
         tslint: require('tslint').default,
-        configuration: tslintConfig,
+        configuration: './tslint.json',
         formatter: 'prose',
       }))
       .pipe(tslint.report({emitError: true}));
