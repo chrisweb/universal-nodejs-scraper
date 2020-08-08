@@ -11,6 +11,14 @@ To install the (npm) dependencies:
 npm i
 ```
 
+## lint
+
+To lint:  
+
+```
+npm run lint
+```
+
 ## build
 
 To do a build (compile typescript):  

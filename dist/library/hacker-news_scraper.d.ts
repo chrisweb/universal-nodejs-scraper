@@ -18,6 +18,5 @@ declare class Scraper {
     private pageCounter;
     execute: (scrapRequestOptions?: IScrapOptions) => Promise<IScrapResponse | Error>;
     private sanitizeString;
-    private scrap;
 }
 export default Scraper;

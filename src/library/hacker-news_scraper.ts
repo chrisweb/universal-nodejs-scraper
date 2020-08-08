@@ -2,17 +2,17 @@
 import * as https from 'https';
 
 // nodejs request module
-import * as fs from 'fs';
+//import * as fs from 'fs';
 
 // https://github.com/cheeriojs/cheerio
-import * as cheerio from 'cheerio';
+//import * as cheerio from 'cheerio';
 
 // https://github.com/zemirco/json2csv
-import * as json2csv from 'json2csv';
+//import * as json2csv from 'json2csv';
 //import * as json2csv from 'json2csv';
 
 // https://github.com/lodash/lodash
-import * as _ from 'lodash';
+//import * as _ from 'lodash';
 
 // https://github.com/chrisweb/chrisweb-utilities.js
 //import utilities from 'chrisweb-utilities';
@@ -83,7 +83,7 @@ class Scraper {
 
     }
 
-    
+
 
 
         /*
@@ -224,11 +224,13 @@ class Scraper {
 
     };
 
-    private scrap = (urlToScrap: string, callback: () => void): void => {
+    //private scrap = (urlToScrap: string, callback: () => void): void => {
 
-        https.get(urlToScrap, (response: {}) => {
+        //https.get(urlToScrap, (response: IScrapResponse) => {
 
-            console.log(response);
+            //console.log(response);
+
+            //callback();
 
             /*if (!error && response.statusCode == 200) {
 
@@ -330,9 +332,9 @@ class Scraper {
 
             }*/
 
-        });
+        //});
 
-    };
+    //};
 
 
     /*let saveAsCSV = function (results, fields) {
