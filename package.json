@@ -25,7 +25,7 @@
     "cheerio": "1.0.0-rc.2",
     "chrisweb-utilities": "git://github.com/chrisweb/chrisweb-utilities.js.git#0.1.4",
     "json2csv": "4.3.5",
-    "lodash": "4.17.11"
+    "lodash": "4.17.19"
   },
   "devDependencies": {
     "@types/cheerio": "0.22.10",
