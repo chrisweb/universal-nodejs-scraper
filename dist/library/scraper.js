@@ -1,30 +1,11 @@
-﻿/// <reference path="node_modules/json2csv/index.d.ts" />
-/// <reference path="node_modules/@types/cheerio/index.d.ts" />
-/// <reference path="node_modules/@types/lodash/index.d.ts" />
-
 // nodejs request module
-let request = require('request');
-
-// nodejs request module
-let fs = require('fs');
-
-// https://github.com/cheeriojs/cheerio
-import * as cheerio from 'cheerio';
-
-// https://github.com/zemirco/json2csv
-let json2csv = require('json2csv');
-//import * as json2csv from 'json2csv';
-
-// https://github.com/lodash/lodash
-import * as _ from 'lodash';
-
+import * as https from 'https';
 // https://github.com/chrisweb/chrisweb-utilities.js
-let utilities = require('chrisweb-utilities');
-
+//import utilities from 'chrisweb-utilities';
 /*
 let scrapDetails = function (urlToScrap, callback) {
 
-    request(urlToScrap, function (error, response, html) {
+    https.request(urlToScrap, function (error, response, html) {
 
         if (!error && response.statusCode == 200) {
 
@@ -85,50 +66,38 @@ let scrapDetails = function (urlToScrap, callback) {
 
 };
 */
-
-let sanitizeString = function santizeStringFunction(input) {
-
+const sanitizeString = function santizeStringFunction(input) {
     // 1) remove all spaces and tabs but keep \r and \n
     // 2) remove multiple spaces and keep just one
     // 3) trim removes spaces and line breaks if they are at the beginning or end,
     // so no regex needed for this
-    let inputNoSpace = input.replace(/[\t]/g, '').replace(/  +/g, ' ').trim();
-
+    const inputNoSpace = input.replace(/[\t]/g, '').replace(/  +/g, ' ').trim();
     // apple uses \r for linebreaks, linux \n and windows \r\n
     // replace all \n, all \r and all \r\n by <br>
     // replace multiple <br> with an optional space in front or after them with \u2028
     // json stringify won't escape \u2028 (which is LS)
     // if we would use \n it would get escaped
     // below before writing the csv we will convert the \u2028 back to \n
-    let output = inputNoSpace.replace(/(\r\n?|\n)/g, '<br>').replace(/( ?<br\s*\/?> ?){1,}/gi, '\u2028');
-
+    const output = inputNoSpace.replace(/(\r\n?|\n)/g, '<br>').replace(/( ?<br\s*\/?> ?){1,}/gi, '\u2028');
     return output;
-
 };
-
-let pageCounter = 1;
-
-let scrap = function (urlToScrap, callback) {
-
-    request(urlToScrap, function (error, response, html) {
-
-        if (!error && response.statusCode == 200) {
+const pageCounter = 1;
+const scrap = (urlToScrap, callback) => {
+    https.get(urlToScrap, (response) => {
+        console.log(response);
+        /*if (!error && response.statusCode == 200) {
 
             utilities.log('finished harvesting page ' + pageCounter + ' now extracting metadata ...', 'fontColor:blue');
 
             pageCounter++;
 
             let $ = cheerio.load(html);
-            
-            let parsedResults = [];
 
-            let $body = $('body');
+            const parsedResults = [];
 
+            const $body = $('body');
 
-
-
-
-            /*let domainToScrap = 'http://www..com';
+            /*const domainToScrap = 'http://www..com';
 
             let $elementWithId = $body.find('#ausform');
             let $table = $('#ausform').find('table');
@@ -148,7 +117,7 @@ let scrap = function (urlToScrap, callback) {
                     let $countryColumn = $element.find('.cspacer.ca4');
                     let $hallsColumn = $element.find('.cspacer.ca5');
                     let $boothsColumn = $element.find('.cspacer.ca6');
-                
+
                     let $titleColumnLink = $titleColumn.find('a');
                     let detailsUrl = domainToScrap + $titleColumnLink.prop('href');
                     let name = $titleColumnLink.text().trim();
@@ -178,7 +147,7 @@ let scrap = function (urlToScrap, callback) {
                             parsedResults.push(metadata);
 
                             if (index === allRowsLength - 1) {
-                        
+
                                 // find links to other pages (through pagination)
                                 let $pager = $body.find('.pager');
                                 let $lastLinkElement = $pager.find('a').last();
@@ -193,9 +162,9 @@ let scrap = function (urlToScrap, callback) {
                                 if (_.isNaN(lastLinkContent)) {
                                     nextPageUrl = domainToScrap + lastLinkUrl;
                                 }
-                            
+
                                 callback(null, parsedResults, nextPageUrl);
-                            
+
                             }
 
                         } else {
@@ -205,22 +174,21 @@ let scrap = function (urlToScrap, callback) {
                         }
 
                     });
-                
+
                 }, index*1000);
 
             });*/
-
-        } else {
+        /*} else {
 
             callback(error, []);
 
-        }
-
+        }*/
     });
-
 };
-
-let saveAsCSV = function (results, fields) {
+function newFunction(response) {
+    console.log(response);
+}
+/*let saveAsCSV = function (results, fields) {
 
     json2csv({ data: results, fields: fields }, function (error, csv) {
 
@@ -254,17 +222,15 @@ let saveAsCSV = function (results, fields) {
 
     });
 
-};
-
-let createFile = function (results) {
+};*/
+/*let createFile = function (results) {
 
     let fields = _.keys(results[0]);
 
     saveAsCSV(results, fields);
 
-};
-
-var save = function saveFunction(results) {
+};*/
+/*var save = function saveFunction(results) {
 
     // save the scrapping result
     switch (scrapOptions.save) {
@@ -273,14 +239,12 @@ var save = function saveFunction(results) {
             break;
     }
 
-}
+}*/
+//let results: [] = [];
+//let pagesCount = 0;
+/*const execute = (scrapUrl: string): void => {
 
-let results = [];
-let pagesCount = 0;
-
-let execute = function (scrapUrl) {
-    
-    scrap(scrapOptions.url, function (error, parsedResults, nextPageUrl) {
+    scrap(scrapOptions.url, (error, parsedResults, nextPageUrl: string): void => {
 
         if (!error) {
 
@@ -294,7 +258,7 @@ let execute = function (scrapUrl) {
                 let scrapOn = false;
 
                 // continue scrapping if the amount of scrapped pages
-                // is below the amount defined in the options or if 
+                // is below the amount defined in the options or if
                 // no limit got defined at all
                 if (
                     'count' in scrapOptions.pagination
@@ -326,18 +290,15 @@ let execute = function (scrapUrl) {
 
         }
 
-    });
+    };
 
-};
-
-utilities.log('scrapping started', 'fontColor:green');
-
-let scrapOptions = {
+};*/
+//utilities.log('scrapping started', 'fontColor:green');
+/*const scrapOptions = {
     url: 'https://news.ycombinator.com/',
     pagination: {
         count: 10
     },
     save: 'csv'
-};
-
-execute(scrapOptions.url);
+};*/
+//execute(scrapOptions.url);

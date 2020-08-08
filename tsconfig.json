@@ -4,20 +4,17 @@
     "declaration": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "module": "commonjs",
+    "module": "es6",
     "moduleResolution": "node",
-    "outDir": "./build",
+    "outDir": "./dist",
     "noImplicitAny": true,
     "noFallthroughCasesInSwitch": true,
-    "paths": {
-
-    },
-    "rootDir": ".",
     "inlineSourceMap": true,
     "lib": ["es5"],
     "skipDefaultLibCheck": true,
     "skipLibCheck": true,
-    "target": "es5"
+    "target": "es6",
+    "rootDir": "src"
   },
   "exclude": [
     "node_modules"
