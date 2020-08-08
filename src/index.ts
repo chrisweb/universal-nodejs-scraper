@@ -1,5 +1,9 @@
-import Scraper from './library/scraper.js';
+import HackerNewsScraper from './library/hacker-news_scraper.js';
 
-const scraper = new Scraper();
+const hackerNewsScraper = new HackerNewsScraper();
 
-scraper.execute();
+hackerNewsScraper.execute().then((response) => {
+
+    console.log(response);
+
+});

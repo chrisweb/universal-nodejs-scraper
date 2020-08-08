@@ -1,63 +1,95 @@
 // nodejs request module
 import * as https from 'https';
-class Scraper {
-    constructor() {
+var Scraper = /** @class */ (function () {
+    function Scraper() {
+        var _this = this;
         this.scrapOptions = {
             pagination: {
                 count: 10,
             },
             save: 'csv',
-            url: 'https://news.ycombinator.com/',
+            url: 'news.ycombinator.com',
+            port: 443,
+            path: '/',
+            method: 'GET',
         };
         this.pageCounter = 1;
-        this.execute = (scrapUrl = this.scrapOptions.url) => {
-            //scrap(scrapOptions.url, (error, parsedResults, nextPageUrl: string): void => {
-            this.scrap(this.scrapOptions.url, () => {
-                /*if (!error) {
-    
-                    results = _.union(results, parsedResults);
-    
-                    // if there is no next page no need to go on scrapping
-                    if (!_.isNull(nextPageUrl)) {
-    
-                        pagesCount++;
-    
-                        let scrapOn = false;
-    
-                        // continue scrapping if the amount of scrapped pages
-                        // is below the amount defined in the options or if
-                        // no limit got defined at all
-                        if (
-                            'count' in scrapOptions.pagination
-                            && pagesCount < scrapOptions.pagination.count
-                        ) {
-                            scrapOn = true;
-                        } else if (!('count' in scrapOptions.pagination)) {
-                            scrapOn = true;
+        this.execute = function (scrapRequestOptions) {
+            if (scrapRequestOptions === void 0) { scrapRequestOptions = _this.scrapOptions; }
+            return new Promise(function (resolve, reject) {
+                var requestOptions = {
+                    hostname: scrapRequestOptions.url,
+                    port: scrapRequestOptions.port,
+                    path: scrapRequestOptions.path,
+                    method: scrapRequestOptions.method,
+                };
+                var request = https.request(requestOptions, function (response) {
+                    var body = '';
+                    response.on('data', function (chunk) { return (body += chunk.toString()); });
+                    response.on('error', reject);
+                    response.on('end', function () {
+                        if (response.statusCode >= 200 && response.statusCode <= 299) {
+                            resolve({ statusCode: response.statusCode, headers: response.headers, body: body });
                         }
-    
-                        if (scrapOn) {
-    
-                            // wait 1 second then do next call
-                            setTimeout(() => {
-                                execute(nextPageUrl);
-                            }, 1000);
-    
-                        } else {
-    
-                            save(results);
-    
+                        else {
+                            reject('Request failed. status: ' + response.statusCode + ', body: ' + body);
                         }
-    
-                    } else {
-    
-                        save(results);
-    
-                    }
-    
-                }*/
+                    });
+                });
+                request.on('error', reject);
+                request.end();
             });
         };
+        /*
+
+        //scrap(scrapOptions.url, (error, parsedResults, nextPageUrl: string): void => {
+        this.scrap(scrapUrl, (): void => {
+
+            /*if (!error) {
+
+                results = _.union(results, parsedResults);
+
+                // if there is no next page no need to go on scrapping
+                if (!_.isNull(nextPageUrl)) {
+
+                    pagesCount++;
+
+                    let scrapOn = false;
+
+                    // continue scrapping if the amount of scrapped pages
+                    // is below the amount defined in the options or if
+                    // no limit got defined at all
+                    if (
+                        'count' in scrapOptions.pagination
+                        && pagesCount < scrapOptions.pagination.count
+                    ) {
+                        scrapOn = true;
+                    } else if (!('count' in scrapOptions.pagination)) {
+                        scrapOn = true;
+                    }
+
+                    if (scrapOn) {
+
+                        // wait 1 second then do next call
+                        setTimeout(() => {
+                            execute(nextPageUrl);
+                        }, 1000);
+
+                    } else {
+
+                        save(results);
+
+                    }
+
+                } else {
+
+                    save(results);
+
+                }
+
+            }*/
+        //});
+        //}
         /*
         let scrapDetails = function (urlToScrap, callback) {
     
@@ -127,18 +159,18 @@ class Scraper {
             // 2) remove multiple spaces and keep just one
             // 3) trim removes spaces and line breaks if they are at the beginning or end,
             // so no regex needed for this
-            const inputNoSpace = input.replace(/[\t]/g, '').replace(/  +/g, ' ').trim();
+            var inputNoSpace = input.replace(/[\t]/g, '').replace(/  +/g, ' ').trim();
             // apple uses \r for linebreaks, linux \n and windows \r\n
             // replace all \n, all \r and all \r\n by <br>
             // replace multiple <br> with an optional space in front or after them with \u2028
             // json stringify won't escape \u2028 (which is LS)
             // if we would use \n it would get escaped
             // below before writing the csv we will convert the \u2028 back to \n
-            const output = inputNoSpace.replace(/(\r\n?|\n)/g, '<br>').replace(/( ?<br\s*\/?> ?){1,}/gi, '\u2028');
+            var output = inputNoSpace.replace(/(\r\n?|\n)/g, '<br>').replace(/( ?<br\s*\/?> ?){1,}/gi, '\u2028');
             return output;
         };
-        this.scrap = (urlToScrap, callback) => {
-            https.get(urlToScrap, (response) => {
+        this.scrap = function (urlToScrap, callback) {
+            https.get(urlToScrap, function (response) {
                 console.log(response);
                 /*if (!error && response.statusCode == 200) {
     
@@ -296,5 +328,6 @@ class Scraper {
         //let pagesCount = 0;
         //utilities.log('scrapping started', 'fontColor:green');
     }
-}
+    return Scraper;
+}());
 export default Scraper;

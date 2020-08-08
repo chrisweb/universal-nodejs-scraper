@@ -1,22 +1,31 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
     "declaration": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "module": "es6",
     "moduleResolution": "node",
-    "outDir": "./dist",
+    "rootDir": "./src",
+    "outDir": "dist",
+    "inlineSourceMap": true,
+    "declarationDir": "dist",
     "noImplicitAny": true,
     "noFallthroughCasesInSwitch": true,
-    "inlineSourceMap": true,
-    "lib": ["es5"],
     "skipDefaultLibCheck": true,
     "skipLibCheck": true,
-    "target": "es6",
-    "rootDir": "src"
+    "lib": [
+      "es5",
+      "es6",
+      "es7",
+      "esnext",
+      "dom"
+    ],
+    "target": "es5"
   },
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "examples",
+    "scripts",
+    "dist"
   ]
 }

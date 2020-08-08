@@ -23,6 +23,15 @@ interface IScrapOptions {
     };
     save: string;
     url: string;
+    port: number;
+    path: string;
+    method: string;
+}
+
+interface IScrapResponse {
+    statusCode: number;
+    headers: unknown;
+    body: string;
 }
 
 class Scraper {
@@ -32,15 +41,55 @@ class Scraper {
             count: 10,
         },
         save: 'csv',
-        url: 'https://news.ycombinator.com/',
+        url: 'news.ycombinator.com',
+        port: 443,
+        path: '/',
+        method: 'GET',
     };
 
     private pageCounter = 1;
 
-    public execute = (scrapUrl: string = this.scrapOptions.url): void => {
+    public execute = (scrapRequestOptions: IScrapOptions = this.scrapOptions): Promise<IScrapResponse | Error> => {
+
+        return new Promise((resolve, reject) => {
+
+            const requestOptions = {
+                hostname: scrapRequestOptions.url,
+                port: scrapRequestOptions.port,
+                path: scrapRequestOptions.path,
+                method: scrapRequestOptions.method,
+            };
+
+            const request = https.request(requestOptions, (response) => {
+
+                let body = '';
+                response.on('data', (chunk) => (body += chunk.toString()));
+                response.on('error', reject);
+                response.on('end', () => {
+
+                    if (response.statusCode >= 200 && response.statusCode <= 299) {
+                        resolve({ statusCode: response.statusCode, headers: response.headers, body: body });
+                    } else {
+                        reject('Request failed. status: ' + response.statusCode + ', body: ' + body);
+                    }
+
+                });
+            });
+
+            request.on('error', reject);
+            request.end();
+
+        });
+
+    }
+
+    
+
+
+        /*
 
         //scrap(scrapOptions.url, (error, parsedResults, nextPageUrl: string): void => {
-        this.scrap(this.scrapOptions.url, (): void => {
+        this.scrap(scrapUrl, (): void => {
 
             /*if (!error) {
 
@@ -86,9 +135,9 @@ class Scraper {
 
             }*/
 
-        });
+        //});
 
-    }
+    //}
 
     /*
     let scrapDetails = function (urlToScrap, callback) {
