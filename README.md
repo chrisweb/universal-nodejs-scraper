@@ -3,12 +3,28 @@
 
 universal nodejs harvester  
 
+## install
+
+To install the (npm) dependencies:  
+
+```
+npm i
+```
+
+## build
+
+To do a build (compile typescript):  
+
+```
+npm run build
+```
+
 ## start
 
 To start the harvester type:  
 
 ```
-node start
+npm run start
 ```
 
 ## TODOs
