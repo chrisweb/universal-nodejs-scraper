@@ -1,9 +1,23 @@
-import HackerNewsScraper from './library/hacker-news_scraper.js';
+import { getPage, scrapContent, saveAsCSV } from './library/hacker-news_scraper.js';
 
-const hackerNewsScraper = new HackerNewsScraper();
+getPage().then((response) => {
 
-hackerNewsScraper.execute().then((response) => {
+    //console.log(response);
 
-    console.log(response);
+    const articlesPromise = scrapContent(response.body);
+
+    articlesPromise.then((articles) => {
+
+        //console.log(articles);
+
+        saveAsCSV(articles).then((response) => {
+            console.log(response);
+        }).catch((error) => {
+            console.log(error);
+        });
+
+    }).catch((error) => {
+        console.log(error);
+    });
 
 });

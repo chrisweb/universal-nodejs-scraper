@@ -2,20 +2,29 @@
 import * as https from 'https';
 
 // nodejs request module
-//import * as fs from 'fs';
+import { createWriteStream } from 'fs';
 
 // https://github.com/cheeriojs/cheerio
+//import cheerio from 'cheerio'
 //import * as cheerio from 'cheerio';
+//const load = cheerio.load;
+
+import { load } from 'cheerio';
 
 // https://github.com/zemirco/json2csv
 //import * as json2csv from 'json2csv';
-//import * as json2csv from 'json2csv';
+import { AsyncParser } from 'json2csv';
 
-// https://github.com/lodash/lodash
-//import * as _ from 'lodash';
+//import json2csv from 'json2csv';
+
+//import pkg from 'json2csv';
+//const { AsyncParser } = pkg;
 
 // https://github.com/chrisweb/chrisweb-utilities.js
-//import utilities from 'chrisweb-utilities';
+//import * as utilities from 'chrisweb-utilities';
+//const log = utilities.log;
+
+import { log } from 'chrisweb-utilities';
 
 interface IScrapOptions {
     pagination: {
@@ -34,369 +43,202 @@ interface IScrapResponse {
     body: string;
 }
 
-class Scraper {
+interface IArticlePartTitle {
+    title: string;
+    rank: number;
+}
 
-    private scrapOptions: IScrapOptions = {
-        pagination: {
-            count: 10,
-        },
-        save: 'csv',
-        url: 'news.ycombinator.com',
-        port: 443,
-        path: '/',
-        method: 'GET',
-    };
+interface IArticlePartScore {
+    score: number;
+}
 
-    private pageCounter = 1;
+interface IArticle extends IArticlePartTitle, IArticlePartScore {}
 
-    public execute = (scrapRequestOptions: IScrapOptions = this.scrapOptions): Promise<IScrapResponse | Error> => {
+const scrapOptions: IScrapOptions = {
+    pagination: {
+        count: 10,
+    },
+    save: 'csv',
+    url: 'news.ycombinator.com',
+    port: 443,
+    path: '/',
+    method: 'GET',
+};
 
-        return new Promise((resolve, reject) => {
+export function getPage(scrapRequestOptions: IScrapOptions = scrapOptions): Promise<IScrapResponse> {
 
-            const requestOptions = {
-                hostname: scrapRequestOptions.url,
-                port: scrapRequestOptions.port,
-                path: scrapRequestOptions.path,
-                method: scrapRequestOptions.method,
-            };
+    return new Promise((resolve, reject) => {
 
-            const request = https.request(requestOptions, (response) => {
+        const requestOptions = {
+            hostname: scrapRequestOptions.url,
+            port: scrapRequestOptions.port,
+            path: scrapRequestOptions.path,
+            method: scrapRequestOptions.method,
+        };
 
-                let body = '';
-                response.on('data', (chunk) => (body += chunk.toString()));
-                response.on('error', reject);
-                response.on('end', () => {
+        log('starting scrapping...', 'fontColor:yellow');
 
-                    if (response.statusCode >= 200 && response.statusCode <= 299) {
-                        resolve({ statusCode: response.statusCode, headers: response.headers, body: body });
-                    } else {
-                        reject('Request failed. status: ' + response.statusCode + ', body: ' + body);
-                    }
+        const request = https.request(requestOptions, (response) => {
 
-                });
-            });
+            let body = '';
+            response.on('data', (chunk) => (body += chunk.toString()));
+            response.on('error', reject);
+            response.on('end', () => {
 
-            request.on('error', reject);
-            request.end();
-
-        });
-
-    }
-
-
-
-
-        /*
-
-        //scrap(scrapOptions.url, (error, parsedResults, nextPageUrl: string): void => {
-        this.scrap(scrapUrl, (): void => {
-
-            /*if (!error) {
-
-                results = _.union(results, parsedResults);
-
-                // if there is no next page no need to go on scrapping
-                if (!_.isNull(nextPageUrl)) {
-
-                    pagesCount++;
-
-                    let scrapOn = false;
-
-                    // continue scrapping if the amount of scrapped pages
-                    // is below the amount defined in the options or if
-                    // no limit got defined at all
-                    if (
-                        'count' in scrapOptions.pagination
-                        && pagesCount < scrapOptions.pagination.count
-                    ) {
-                        scrapOn = true;
-                    } else if (!('count' in scrapOptions.pagination)) {
-                        scrapOn = true;
-                    }
-
-                    if (scrapOn) {
-
-                        // wait 1 second then do next call
-                        setTimeout(() => {
-                            execute(nextPageUrl);
-                        }, 1000);
-
-                    } else {
-
-                        save(results);
-
-                    }
-
+                if (response.statusCode >= 200 && response.statusCode <= 299) {
+                    log('scrapping done', 'fontColor:green');
+                    resolve({ statusCode: response.statusCode, headers: response.headers, body: body });
                 } else {
-
-                    save(results);
-
+                    reject('Request failed. status: ' + response.statusCode + ', body: ' + body);
                 }
 
-            }*/
-
-        //});
-
-    //}
-
-    /*
-    let scrapDetails = function (urlToScrap, callback) {
-
-        https.request(urlToScrap, function (error, response, html) {
-
-            if (!error && response.statusCode == 200) {
-
-                utilities.log('finished harvesting details, now extracting metadata ...', 'fontColor:yellow');
-
-                let $ = cheerio.load(html);
-
-                let result = {};
-
-                let $body = $('body');
-                let $mainContent = $body.find('.maincontent');
-                let $rowsChildren = $mainContent.children('.row');
-                let $thirdRow = $rowsChildren.eq(2);
-                let $detailsTable = $thirdRow.find('table');
-                //let $detailsTableBody = $detailsTable.find('tbody');
-                let $tableRows = $detailsTable.children('tr');
-
-                $tableRows.each(function (index, element) {
-
-                    let $element = $(element);
-                    let $columns = $element.find('td');
-                    let $secondColumn = $columns.eq(1);
-
-                    let secondColumnContentRaw = $secondColumn.text();
-
-                    let secondColumnContent = sanitizeString(secondColumnContentRaw);
-
-                    switch (index) {
-                        case 1:
-                            result['address'] = secondColumnContent || '';
-                            break;
-                        case 2:
-                            result['telephone'] = secondColumnContent || '';
-                            break;
-                        case 3:
-                            result['mobile'] = secondColumnContent || '';
-                            break;
-                        case 4:
-                            result['email'] = secondColumnContent || '';
-                            break;
-                        case 5:
-                            result['website'] = secondColumnContent || '';
-                            break;
-                    }
-
-                });
-
-                callback(null, result);
-
-            } else {
-
-                callback(error, '');
-
-            }
-
-
+            });
         });
 
-    };
-    */
+        request.on('error', reject);
+        request.end();
 
-    private sanitizeString = function santizeStringFunction(input: string) {
-
-        // 1) remove all spaces and tabs but keep \r and \n
-        // 2) remove multiple spaces and keep just one
-        // 3) trim removes spaces and line breaks if they are at the beginning or end,
-        // so no regex needed for this
-        const inputNoSpace = input.replace(/[\t]/g, '').replace(/  +/g, ' ').trim();
-
-        // apple uses \r for linebreaks, linux \n and windows \r\n
-        // replace all \n, all \r and all \r\n by <br>
-        // replace multiple <br> with an optional space in front or after them with \u2028
-        // json stringify won't escape \u2028 (which is LS)
-        // if we would use \n it would get escaped
-        // below before writing the csv we will convert the \u2028 back to \n
-        const output = inputNoSpace.replace(/(\r\n?|\n)/g, '<br>').replace(/( ?<br\s*\/?> ?){1,}/gi, '\u2028');
-
-        return output;
-
-    };
-
-    //private scrap = (urlToScrap: string, callback: () => void): void => {
-
-        //https.get(urlToScrap, (response: IScrapResponse) => {
-
-            //console.log(response);
-
-            //callback();
-
-            /*if (!error && response.statusCode == 200) {
-
-                utilities.log('finished harvesting page ' + pageCounter + ' now extracting metadata ...', 'fontColor:blue');
-
-                pageCounter++;
-
-                let $ = cheerio.load(html);
-
-                const parsedResults = [];
-
-                const $body = $('body');
-
-                /*const domainToScrap = 'http://www..com';
-
-                let $elementWithId = $body.find('#ausform');
-                let $table = $('#ausform').find('table');
-                let $tableBody = $table.find('tbody');
-                let $allRows = $tableBody.children('tr');
-
-                let allRowsLength = $allRows.length;
-
-                $allRows.each(function (index, element) {
-
-                    // wait 1 second then do next call
-                    setTimeout(() => {
-
-                        let $element = $(element);
-
-                        let $titleColumn = $element.find('.cspacer.ca3');
-                        let $countryColumn = $element.find('.cspacer.ca4');
-                        let $hallsColumn = $element.find('.cspacer.ca5');
-                        let $boothsColumn = $element.find('.cspacer.ca6');
-
-                        let $titleColumnLink = $titleColumn.find('a');
-                        let detailsUrl = domainToScrap + $titleColumnLink.prop('href');
-                        let name = $titleColumnLink.text().trim();
-
-                        let country = $countryColumn.text().trim();
-
-                        let halls = $hallsColumn.html().trim().replace(/<br>/g, ' / ').replace(/&#xA0;/g, ' ');
-
-                        let booths = $boothsColumn.html().trim().replace(/<br>/g, ' / ').replace(/&#xA0;/g, ' ');
-
-                        // metadata
-                        let coreMetadata = {
-                            name: name,
-                            country: country,
-                            halls: halls,
-                            booths: booths
-                        };
-
-                        // now scrap the details page
-                        // TODO: there should only be one scrapper
-                        scrapDetails(detailsUrl, (error, detailsMetadata) => {
-
-                            if (!error) {
-
-                                let metadata = _.assign(coreMetadata, detailsMetadata);
-
-                                parsedResults.push(metadata);
-
-                                if (index === allRowsLength - 1) {
-
-                                    // find links to other pages (through pagination)
-                                    let $pager = $body.find('.pager');
-                                    let $lastLinkElement = $pager.find('a').last();
-                                    let lastLinkUrl = $lastLinkElement.prop('href');
-
-                                    let nextPageUrl = null;
-                                    let lastLinkContent = parseInt($lastLinkElement.text().trim());
-
-                                    // if the content of the last link last link is NaN it means that
-                                    // it contains an arrow image, so we have a next page, otherweise
-                                    // if it is numeric it means we have reached the end
-                                    if (_.isNaN(lastLinkContent)) {
-                                        nextPageUrl = domainToScrap + lastLinkUrl;
-                                    }
-
-                                    callback(null, parsedResults, nextPageUrl);
-
-                                }
-
-                            } else {
-
-                                callback(error, []);
-
-                            }
-
-                        });
-
-                    }, index*1000);
-
-                });*/
-
-            /*} else {
-
-                callback(error, []);
-
-            }*/
-
-        //});
-
-    //};
-
-
-    /*let saveAsCSV = function (results, fields) {
-
-        json2csv({ data: results, fields: fields }, function (error, csv) {
-
-            // now we need to convert the \u2028 to \n
-            // in json we used \u2028 because JSON.stringify won't escape it
-            // but now we use \n before writing the csv to disk
-            // TODO: would it be better to use os.EOL instead of hardcoded \n ?
-            csv = csv.replace(/\u2028/g, '\n');
-
-            if (error) {
-
-                console.log(error);
-
-            } else {
-
-                fs.writeFile('output.csv', csv, function (err) {
-
-                    if (error) {
-
-                        utilities.log(error, 'fontColor:red');
-
-                    } else {
-
-                        utilities.log('file saved / job done :)', 'fontColor:green');
-
-                    }
-
-                });
-
-            }
-
-        });
-
-    };*/
-
-    /*let createFile = function (results) {
-
-        let fields = _.keys(results[0]);
-
-        saveAsCSV(results, fields);
-
-    };*/
-
-    /*var save = function saveFunction(results) {
-
-        // save the scrapping result
-        switch (scrapOptions.save) {
-            case 'csv':
-                createFile(results);
-                break;
-        }
-
-    }*/
-
-    //let results: [] = [];
-    //let pagesCount = 0;
-
-    //utilities.log('scrapping started', 'fontColor:green');
+    });
 
 }
 
-export default Scraper;
+export function  scrapContent(page: string): Promise<IArticle[]> {
+
+    log('finished harvesting, now extracting data ...', 'fontColor:yellow');
+
+    const $ = load(page);
+
+    const $body = $('body');
+    const $mainContent = $body.find('#hnmain');
+    const $mainTable = $mainContent.find('table.itemlist > tbody');
+    const $tableRows = $mainTable.children('tr');
+
+    const articlesPromises: Promise<{ rank: number, title: string } | { score: number } | undefined>[] = [];
+
+    $tableRows.each(function (index, element) {
+
+        const articlePromise: Promise<{ rank: number, title: string } | { score: number } | undefined> = new Promise((resolve, reject) => {
+
+            const $row = $(element);
+
+            try {
+                
+                // top news item row
+                if ($row.hasClass('athing')) {
+                    const articleRank = parseInt($row.find('.rank').text());
+                    const articleTitle = $row.find('.storylink').text();
+                    resolve({ rank: articleRank, title: articleTitle });
+                }
+
+                // second row with details
+                if (!$row.hasClass('athing') && !$row.hasClass('spacer')) {
+                    const articleScore = parseInt($row.find('.score').text());
+                    if (isNaN(articleScore)) {
+                        resolve();
+                    }
+                    resolve({ score: articleScore });
+                }
+
+                // thirs row which is a space => skip
+                if ($row.hasClass('spacer')) {
+                    // skip
+                }
+
+                resolve();
+
+            } catch (error) {
+                reject(error);
+            }
+
+        });
+
+        articlesPromises.push(articlePromise);
+
+    });
+
+    const articles: IArticle[] = [];
+
+    return Promise.all(articlesPromises).then((articlesParts) => {
+
+        let article: IArticle = {
+            title: '',
+            score: 0,
+            rank: 0
+        };
+
+        for (const articleParts of articlesParts) {
+
+            if (articleParts === undefined) {
+                continue;
+            }
+
+            // check if our object has the title else it is the one with score
+            if ((articleParts as IArticlePartTitle).title) {
+                article.title = (articleParts as IArticlePartTitle).title;
+                article.rank = (articleParts as IArticlePartTitle).rank;
+            } else {
+                article.score = (articleParts as IArticlePartScore).score;
+                articles.push(article);
+                article = {
+                    title: '',
+                    score: 0,
+                    rank: 0
+                };
+            }
+
+        }
+
+        log('extracting done', 'fontColor:green');
+
+        return articles;
+
+    });
+
+}
+
+export function saveAsCSV(articles: IArticle[]): Promise<string> {
+
+    // now we need to convert the \u2028 to \n
+    // in json we used \u2028 because JSON.stringify won't escape it
+    // but now we use \n before writing the csv to disk
+    // TODO: would it be better to use os.EOL instead of hardcoded \n ?
+    //csv = csv.replace(/\u2028/g, '\n');
+
+    const outputPath = './csv/hacker-news_articles.csv';
+    const output = createWriteStream(outputPath, { encoding: 'utf8' });
+    const fields = ['title', 'score', 'rank'];
+    const json2csvOptions = { fields };
+    const asyncParser = new AsyncParser(json2csvOptions);
+
+    articles.forEach((article) => {
+        asyncParser.input.push(JSON.stringify(article));
+    });
+    asyncParser.input.push(null);
+
+    const parsingProcessor = asyncParser.toOutput(output);
+
+    log('writing csv file done (you can find it in the folder called "csv")', 'fontColor:green');
+
+    return parsingProcessor.promise();
+
+} 
+
+//private sanitizeString = function santizeStringFunction(input: string) {
+
+    // 1) remove all spaces and tabs but keep \r and \n
+    // 2) remove multiple spaces and keep just one
+    // 3) trim removes spaces and line breaks if they are at the beginning or end,
+    // so no regex needed for this
+    //const inputNoSpace = input.replace(/[\t]/g, '').replace(/  +/g, ' ').trim();
+
+    // apple uses \r for linebreaks, linux \n and windows \r\n
+    // replace all \n, all \r and all \r\n by <br>
+    // replace multiple <br> with an optional space in front or after them with \u2028
+    // json stringify won't escape \u2028 (which is LS)
+    // if we would use \n it would get escaped
+    // below before writing the csv we will convert the \u2028 back to \n
+    //const output = inputNoSpace.replace(/(\r\n?|\n)/g, '<br>').replace(/( ?<br\s*\/?> ?){1,}/gi, '\u2028');
+
+    //return output;
+
+//};

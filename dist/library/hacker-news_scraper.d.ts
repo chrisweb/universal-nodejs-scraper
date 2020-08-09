@@ -13,10 +13,16 @@ interface IScrapResponse {
     headers: unknown;
     body: string;
 }
-declare class Scraper {
-    private scrapOptions;
-    private pageCounter;
-    execute: (scrapRequestOptions?: IScrapOptions) => Promise<IScrapResponse | Error>;
-    private sanitizeString;
+interface IArticlePartTitle {
+    title: string;
+    rank: number;
 }
-export default Scraper;
+interface IArticlePartScore {
+    score: number;
+}
+interface IArticle extends IArticlePartTitle, IArticlePartScore {
+}
+export declare function getPage(scrapRequestOptions?: IScrapOptions): Promise<IScrapResponse>;
+export declare function scrapContent(page: string): Promise<IArticle[]>;
+export declare function saveAsCSV(articles: IArticle[]): Promise<string>;
+export {};

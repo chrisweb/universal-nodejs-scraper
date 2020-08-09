@@ -13,6 +13,6 @@ plugins: [
     typescript({
         tsconfig: "tsconfig.json",
         useTsconfigDeclarationDir: true
-    }),
+    })
   ],
 }
