@@ -1,6 +1,9 @@
-import { getPage, scrapContent, saveAsCSV } from './library/hacker-news_scraper.js';
+//import { getPage, scrapContent, saveAsCSV } from './library/hacker-news_scraper.js';
+import { getPage } from './library/hacker-news_scraper.js';
 
-getPage().then((response) => {
+getPage();
+
+/*getPage().then((response) => {
 
     //console.log(response);
 
@@ -20,4 +23,4 @@ getPage().then((response) => {
         console.log(error);
     });
 
-});
+});*/

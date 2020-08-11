@@ -1,9 +1,14 @@
 {
   "compilerOptions": {
+    //"allowSyntheticDefaultImports": true,
+    //"esModuleInterop": true,
     "declaration": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "module": "es6",
+    //"module": "CommonJS",
+    //"module": "ES6",
+    //"module": "ESNext",
+    "module": "ES2015",
     "moduleResolution": "node",
     "rootDir": "./src",
     "outDir": "dist",

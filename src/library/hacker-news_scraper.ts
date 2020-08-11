@@ -5,26 +5,38 @@ import * as https from 'https';
 import { createWriteStream } from 'fs';
 
 // https://github.com/cheeriojs/cheerio
+// cjs module, typescript config uses allowSyntheticDefaultImports
 //import cheerio from 'cheerio'
 //import * as cheerio from 'cheerio';
 //const load = cheerio.load;
 
 import { load } from 'cheerio';
 
+load('fwfw');
+
+
 // https://github.com/zemirco/json2csv
-//import * as json2csv from 'json2csv';
-import { AsyncParser } from 'json2csv';
+
+//import json2csv = require('json2csv'); // typescript error: Import assignment cannot be used when targeting ECMAScript modules. Consider using 'import * as ns from "mod"', 'import {a} from "mod"', 'import d from "mod"', or another module format instead
+//import json2csv from 'json2csv' // typescript error: Cannot use namespace 'json2csv' as a value.
+//import * as json2csv from 'json2csv'; // type script will convert this to import { AsyncParser } from 'json2csv';, nodejs error: SyntaxError: The requested module 'json2csv' is expected to be of type CommonJS, which does not support named exports. CommonJS modules can be imported by importing the default export.
+//import { AsyncParser } from 'json2csv'; // nodejs error: SyntaxError: The requested module 'json2csv' is expected to be of type CommonJS, which does not support named exports. CommonJS modules can be imported by importing the default export.
+// what nodejs suggests: "import pkg from 'json2csv'; const { AsyncParser } = pkg;" brings me back to 2
+import * as json2csv from 'json2csv';
+console.log(json2csv.AsyncParser);
 
 //import json2csv from 'json2csv';
 
 //import pkg from 'json2csv';
 //const { AsyncParser } = pkg;
 
+//console.log(typeof AsyncParser);
+
 // https://github.com/chrisweb/chrisweb-utilities.js
 //import * as utilities from 'chrisweb-utilities';
 //const log = utilities.log;
 
-import { log } from 'chrisweb-utilities';
+//import { log } from 'chrisweb-utilities';
 
 interface IScrapOptions {
     pagination: {
@@ -64,9 +76,9 @@ const scrapOptions: IScrapOptions = {
     path: '/',
     method: 'GET',
 };
-
-export function getPage(scrapRequestOptions: IScrapOptions = scrapOptions): Promise<IScrapResponse> {
-
+export function getPage(): void {}
+//export function getPage(scrapRequestOptions: IScrapOptions = scrapOptions): Promise<IScrapResponse> {
+/*
     return new Promise((resolve, reject) => {
 
         const requestOptions = {
@@ -99,9 +111,9 @@ export function getPage(scrapRequestOptions: IScrapOptions = scrapOptions): Prom
         request.end();
 
     });
-
-}
-
+*/
+//}
+/*
 export function  scrapContent(page: string): Promise<IArticle[]> {
 
     log('finished harvesting, now extracting data ...', 'fontColor:yellow');
@@ -242,3 +254,5 @@ export function saveAsCSV(articles: IArticle[]): Promise<string> {
     //return output;
 
 //};
+
+*/

@@ -1,4 +1,5 @@
 ﻿# universal-nodejs-harvester
+
 ## description
 
 universal nodejs harvester  
@@ -7,7 +8,7 @@ universal nodejs harvester
 
 To install the (npm) dependencies:  
 
-```
+```shell
 npm i
 ```
 
@@ -15,7 +16,7 @@ npm i
 
 To lint:  
 
-```
+```shell
 npm run lint
 ```
 
@@ -23,7 +24,7 @@ npm run lint
 
 To do a build (compile typescript):  
 
-```
+```shell
 npm run build
 ```
 
@@ -31,7 +32,7 @@ npm run build
 
 To start the harvester type:  
 
-```
+```shell
 npm run start
 ```
 
