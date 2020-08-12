@@ -2,7 +2,7 @@ interface IScrapOptions {
     pagination: {
         count: number;
     };
-    save: string;
+    saveAs: string;
     url: string;
     port: number;
     path: string;

@@ -1,4 +1,4 @@
-﻿// nodejs request module
+﻿// nodejs https module
 import * as https from 'https';
 
 // nodejs request module
@@ -17,7 +17,7 @@ interface IScrapOptions {
     pagination: {
         count: number;
     };
-    save: string;
+    saveAs: string;
     url: string;
     port: number;
     path: string;
@@ -45,7 +45,7 @@ const scrapOptions: IScrapOptions = {
     pagination: {
         count: 10,
     },
-    save: 'csv',
+    saveAs: 'csv',
     url: 'news.ycombinator.com',
     port: 443,
     path: '/',
@@ -191,7 +191,7 @@ export function saveAsCSV(articles: IArticle[]): Promise<string> {
     // TODO: would it be better to use os.EOL instead of hardcoded \n ?
     //csv = csv.replace(/\u2028/g, '\n');
 
-    const outputPath = './csv/hacker-news_articles.csv';
+    const outputPath = './output/hacker-news_articles.csv';
     const output = createWriteStream(outputPath, { encoding: 'utf8' });
     const fields = ['title', 'score', 'rank'];
     const json2csvOptions = { fields };
@@ -200,6 +200,7 @@ export function saveAsCSV(articles: IArticle[]): Promise<string> {
     articles.forEach((article) => {
         asyncParser.input.push(JSON.stringify(article));
     });
+    
     asyncParser.input.push(null);
 
     const parsingProcessor = asyncParser.toOutput(output);
