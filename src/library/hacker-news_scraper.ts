@@ -194,7 +194,7 @@ export function saveAsCSV(articles: IArticle[]): Promise<string> {
     const outputPath = './output/hacker-news_articles.csv';
     const output = createWriteStream(outputPath, { encoding: 'utf8' });
     // note to self: careful, the following field names need to match the object property names!!!
-    const fields = ['title', 'score', 'rank'];
+    const fields = Object.getOwnPropertyNames(articles[0]);
     const json2csvOptions = { fields };
     const asyncParser = new json2csvAsyncParser(json2csvOptions);
 

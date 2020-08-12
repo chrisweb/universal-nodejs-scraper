@@ -104,7 +104,7 @@ export function saveAsCSV(entities: IEntity[]): Promise<string> {
     const outputPath = './output/example.csv';
     const output = createWriteStream(outputPath, { encoding: 'utf8' });
     // note to self: careful, the following field names need to match the object property names!!!
-    const fields = ['first', 'second', 'third'];
+    const fields = Object.getOwnPropertyNames(entities[0]);
     const json2csvOptions = { fields };
     const asyncParser = new json2csvAsyncParser(json2csvOptions);
 
