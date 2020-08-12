@@ -3,9 +3,9 @@ interface IScrapOptions {
     documentName: string;
 }
 interface IEntity {
-    first: number;
-    second: number;
-    third: number;
+    first: string;
+    second: string;
+    third: string;
 }
 export declare function getDocument(scrapRequestOptions?: IScrapOptions): Promise<string>;
 export declare function scrapContent(data: string): Promise<IEntity[]>;

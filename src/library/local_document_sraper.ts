@@ -19,9 +19,9 @@ interface IScrapOptions {
 }
 
 interface IEntity {
-    first: number;
-    second: number;
-    third: number;
+    first: string;
+    second: string;
+    third: string;
 }
 
 const scrapOptions: IScrapOptions = {
@@ -59,7 +59,10 @@ export function scrapContent(data: string): Promise<IEntity[]> {
 
     const $body = $('body');
     const $mainTable = $body.find('table');
-    const $tableRows = $mainTable.children('tr');
+    const $mainTableBody = $mainTable.find('tbody');
+    const $tableRows = $mainTableBody.children('tr');
+
+    //console.log($tableRows);
 
     const entitiesPromises: Promise<IEntity>[] = [];
 
@@ -68,12 +71,11 @@ export function scrapContent(data: string): Promise<IEntity[]> {
         const entitiesPromise: Promise<IEntity> = new Promise((resolve, reject) => {
 
             const $row = $(element);
-
             try {
 
-                const first = parseInt($row.find('.left').text());
-                const second = parseInt($row.find('.middle').text());
-                const third = parseInt($row.find('.right').text());
+                const first = $row.find('.left').text();
+                const second = $row.find('.middle').text();
+                const third = $row.find('.right').text();
 
                 resolve({ first: first, second: second, third: third });
 
@@ -101,7 +103,8 @@ export function saveAsCSV(entities: IEntity[]): Promise<string> {
 
     const outputPath = './output/example.csv';
     const output = createWriteStream(outputPath, { encoding: 'utf8' });
-    const fields = ['a', 'b', 'c'];
+    // note to self: careful, the following field names need to match the object property names!!!
+    const fields = ['first', 'second', 'first'];
     const json2csvOptions = { fields };
     const asyncParser = new json2csvAsyncParser(json2csvOptions);
 
@@ -113,7 +116,7 @@ export function saveAsCSV(entities: IEntity[]): Promise<string> {
 
     const parsingProcessor = asyncParser.toOutput(output);
 
-    log('writing csv file done (you can find it in the folder called "csv")', 'fontColor:green');
+    log('writing csv file done (you can find it in the folder called "output")', 'fontColor:green');
 
     return parsingProcessor.promise();
 

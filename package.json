@@ -22,7 +22,7 @@
   "bugs": {
     "url": "https://github.com/chrisweb/universal-nodejs-scraper/issues"
   },
-  "module": "dist/index.js",
+  "main": "dist/index.js",
   "homepage": "https://github.com/chrisweb/universal-nodejs-scraper#readme",
   "dependencies": {
     "cheerio": "1.0.0-rc.3",

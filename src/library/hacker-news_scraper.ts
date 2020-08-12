@@ -193,6 +193,7 @@ export function saveAsCSV(articles: IArticle[]): Promise<string> {
 
     const outputPath = './output/hacker-news_articles.csv';
     const output = createWriteStream(outputPath, { encoding: 'utf8' });
+    // note to self: careful, the following field names need to match the object property names!!!
     const fields = ['title', 'score', 'rank'];
     const json2csvOptions = { fields };
     const asyncParser = new json2csvAsyncParser(json2csvOptions);
@@ -205,7 +206,7 @@ export function saveAsCSV(articles: IArticle[]): Promise<string> {
 
     const parsingProcessor = asyncParser.toOutput(output);
 
-    log('writing csv file done (you can find it in the folder called "csv")', 'fontColor:green');
+    log('writing csv file done (you can find it in the folder called "output")', 'fontColor:green');
 
     return parsingProcessor.promise();
 
