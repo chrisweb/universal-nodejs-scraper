@@ -1,5 +1,5 @@
 // example 1: grab top hacker news articles, extract the title, rank and score, save data as csv file
-/*
+
 import { getPage, scrapContent, saveAsCSV } from './library/hacker-news_scraper';
 
 getPage().then((response) => {
@@ -23,8 +23,8 @@ getPage().then((response) => {
     });
 
 });
-*/
 
+/*
 // example 2
 import { getDocument, scrapContent, saveAsCSV } from './library/local_document_sraper';
 
@@ -49,3 +49,4 @@ getDocument().then((data) => {
     });
 
 });
+*/

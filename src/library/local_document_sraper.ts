@@ -72,8 +72,8 @@ export function scrapContent(data: string): Promise<IEntity[]> {
             try {
 
                 const first = parseInt($row.find('.left').text());
-                const second = parseInt($row.find('.right').text());
-                const third = parseInt($row.find('.middle').text());
+                const second = parseInt($row.find('.middle').text());
+                const third = parseInt($row.find('.right').text());
 
                 resolve({ first: first, second: second, third: third });
 
