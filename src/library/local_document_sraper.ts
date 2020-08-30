@@ -26,7 +26,7 @@ interface IEntity {
 
 const scrapOptions: IScrapOptions = {
     saveAs: 'csv',
-    documentName: 'example.html'
+    documentName: 'local_document.html'
 };
 
 export function getDocument(scrapRequestOptions: IScrapOptions = scrapOptions): Promise<string> {
@@ -101,7 +101,7 @@ export function scrapContent(data: string): Promise<IEntity[]> {
 
 export function saveAsCSV(entities: IEntity[]): Promise<string> {
 
-    const outputPath = './output/example.csv';
+    const outputPath = './output/local_document.csv';
     const output = createWriteStream(outputPath, { encoding: 'utf8' });
     // note to self: careful, the following field names need to match the object property names!!!
     const fields = Object.getOwnPropertyNames(entities[0]);
