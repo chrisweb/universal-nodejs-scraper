@@ -157,9 +157,10 @@ getPage().then((data) => {
         }).catch((error) => {
             console.log(error);
         });
-        entities.forEach((entity) => {
+        entities.forEach((entity, index) => {
             const filteredName = chriswebUtilities.filterAlphaNumericPlus(entity.name, '');
-            const fetchImagePromise = fetchImage(entity.image_url, filteredName, 'png');
+            const delayTime = index * 1000;
+            const fetchImagePromise = fetchImage(entity.image_url, filteredName, 'png', delayTime);
             fetchImagePromise.then(() => {
                 return;
             }).catch((error) => {

@@ -76,11 +76,12 @@ getPage().then((data) => {
             console.log(error);
         });
 
-        entities.forEach((entity) => {
+        entities.forEach((entity, index) => {
 
             const filteredName = filterAlphaNumericPlus(entity.name, '') as string;
+            const delayTime = index*1000;
 
-            const fetchImagePromise = fetchImage(entity.image_url, filteredName, 'png');
+            const fetchImagePromise = fetchImage(entity.image_url, filteredName, 'png', delayTime);
 
             fetchImagePromise.then(() => {
                 return;
