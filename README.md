@@ -10,9 +10,11 @@ But for now only a part of this vision has been coded, which is the harvester it
 
 To check out the examples open the index.ts file located in src
 
-The first example of this project is a web scraper / content harvester that reads the content of the hacker news homepage and saves the result into a csv file, you can modify that code to fetch any other website and then you need to adapt the selectors to match the scrapped content and be able to extract the information you seek, then finally you need to adapt the columns of the csv output to match your content.
+The first example of this project is a web scraper / content harvester that reads the content of the [hacker news homepage](https://news.ycombinator.com/) and saves the result into a csv file, you can modify that code to fetch any other website and then you need to adapt the selectors to match the scrapped content and be able to extract the information you seek, then finally you need to adapt the columns of the csv output to match your content.
 
 The second example does a similar job, except that instead of fetching a webpage on the web it loads a static html file from a folder, the next two steps are similar to what is done in the first example.
+
+The third example is a [wikipedia.org list of countries by population (united nations data source)](https://en.wikipedia.org/wiki/List_of_countries_by_population_(United_Nations)) scrapper which also scraps images. The script will create a csv file with the names of all the countries in the world and will also download each flag image from wikipedia, it downloads the images at an interval of 1 to 5 seconds. The csv file can be easily converted to a google sheet which will then dispay the flags images using a cell formula, for each country row.
 
 ## install
 
