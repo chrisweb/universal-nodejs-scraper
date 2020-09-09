@@ -10,11 +10,11 @@ But for now only a part of this vision has been coded, which is the harvester it
 
 To check out the examples open the index.ts file located in src
 
-The first example of this project is a web scraper / content harvester that reads the content of the [hacker news homepage](https://news.ycombinator.com/) and saves the result into a csv file, you can modify that code to fetch any other website and then you need to adapt the selectors to match the scrapped content and be able to extract the information you seek, then finally you need to adapt the columns of the csv output to match your content.
+The first example of this project is a web scraper / content harvester that reads the content of the [hacker news homepage](https://news.ycombinator.com/) and saves the result into a csv file, you can modify that code to start crawling any other website. All you need to do is set the correct URL and then you also need to adapt the dom selectors to extract the data you need from the scrapped html document. After extracting the information you seek, you finally need to adapt the columns of the csv output file to match your content or even replace the csv file with any database storage you prefer.
 
-The second example does a similar job, except that instead of fetching a webpage on the web it loads a static html file from a folder, the next two steps are similar to what is done in the first example.
+The second example does a similar job, except that instead of crwaling a webpage on the web it loads a static html file from a local folder on your computer, the next two steps are similar to what is done in the first example.
 
-The third example is a [wikipedia.org list of countries by population (united nations data source)](https://en.wikipedia.org/wiki/List_of_countries_by_population_(United_Nations)) scrapper which also scraps images. The script will create a csv file with the names of all the countries in the world and will also download each flag image from wikipedia, it downloads the images at an interval of 1 to 5 seconds. The csv file can be easily converted to a google sheet which will then dispay the flags images using a cell formula, for each country row.
+The third example is a [wikipedia.org list of countries by population (united nations data source)](https://en.wikipedia.org/wiki/List_of_countries_by_population_(United_Nations)) scrapper which harvests the html document content but will also download each of the country flags  images. The script will create a csv file with the names of all the countries in the world and will also download each flag image from wikipedia, it downloads the images at an interval of 1 to 5 seconds. The csv file can be easily converted to a google sheet which will then dispay the flags images using a cell formula, for each country row.
 
 ## install
 
