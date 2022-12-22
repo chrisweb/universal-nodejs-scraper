@@ -1,10 +1,8 @@
-'use strict';
-
-var chriswebUtilities = require('chrisweb-utilities');
-var fs = require('fs');
-var https = require('https');
-var cheerio = require('cheerio');
-var json2csv = require('json2csv');
+import { log, randomInteger, sleep, filterAlphaNumericPlus } from 'chrisweb-utilities';
+import { readFile, createWriteStream } from 'fs';
+import * as https from 'https';
+import { load } from 'cheerio';
+import { AsyncParser } from 'json2csv';
 
 // nodejs request module
 const scrapOptions = {
@@ -22,18 +20,18 @@ function getPage(scrapRequestOptions = scrapOptions) {
             path: scrapRequestOptions.path,
             method: scrapRequestOptions.method,
         };
-        chriswebUtilities.log('starting scrapping...', 'fontColor:yellow');
+        log('starting scrapping...', 'fontColor:yellow');
         const request = https.request(requestOptions, (response) => {
             let body = '';
             response.on('data', (chunk) => (body += chunk.toString()));
             response.on('error', reject);
             response.on('end', () => {
                 if (response.statusCode >= 200 && response.statusCode <= 299) {
-                    chriswebUtilities.log('scrapping done', 'fontColor:green');
-                    resolve({ statusCode: response.statusCode, headers: response.headers, body: body });
+                    log('scrapping done', 'fontColor:green');
+                    resolve({ statusCode: response.statusCode, headers: response.headers, body });
                 }
                 else {
-                    reject('Request failed. status: ' + response.statusCode + ', body: ' + body);
+                    reject(new Error('Request failed. status: ' + response.statusCode + ', body: ' + body));
                 }
             });
         });
@@ -41,12 +39,12 @@ function getPage(scrapRequestOptions = scrapOptions) {
         request.end();
     });
 }
-function scrapContent(data) {
-    chriswebUtilities.log('finished harvesting, now extracting data ...', 'fontColor:yellow');
-    const $ = cheerio.load(data);
-    const $items = $('table#main > tbody');
+async function scrapContent(data) {
+    log('finished harvesting, now extracting data ...', 'fontColor:yellow');
+    const $ = load(data);
+    const $items = $('table > tbody');
     const $tableRows = $items.children('tr');
-    //console.log($tableRows);
+    console.log($tableRows);
     const entitiesPromises = [];
     $tableRows.each(function (index, element) {
         const rowIndex = index + 1;
@@ -68,11 +66,9 @@ function scrapContent(data) {
             entitiesPromises.push(entitiesPromise);
         }
     });
-    return Promise.all(entitiesPromises).then((entitiesArray) => {
-        chriswebUtilities.log('extracting done', 'fontColor:green');
-        //console.log(entitiesArray);
-        return entitiesArray;
-    });
+    const entitiesArray = await Promise.all(entitiesPromises);
+    log('extracting done', 'fontColor:green');
+    return entitiesArray;
 }
 function fetchImage(url, filename, extension, delayTime = 0) {
     return new Promise((resolve, reject) => {
@@ -80,17 +76,17 @@ function fetchImage(url, filename, extension, delayTime = 0) {
         const localPath = './output/images/' + imageFullName;
         const minWaitTime = delayTime + 1000;
         const maxWaitTime = delayTime + 5000;
-        const randomWaitAmount = chriswebUtilities.randomInteger(minWaitTime, maxWaitTime);
+        const randomWaitAmount = randomInteger(minWaitTime, maxWaitTime);
         // check if image doesn't exist already
-        fs.readFile(localPath, function (error) {
+        readFile(localPath, function (error) {
             // error = file doesn't yet exist
             if (error) {
                 // wait for delay + 1 to 5 seconds before fetching
                 // to not overload the server we are fetching from
-                chriswebUtilities.sleep(randomWaitAmount).then(() => {
-                    chriswebUtilities.log('fetching image: ' + imageFullName, 'fontColor:blue');
+                sleep(randomWaitAmount).then(() => {
+                    log('fetching image: ' + imageFullName, 'fontColor:blue');
                     https.get(url, (response) => {
-                        const localImageStream = fs.createWriteStream(localPath);
+                        const localImageStream = createWriteStream(localPath);
                         response.pipe(localImageStream);
                         resolve();
                     }).on('error', (error) => {
@@ -106,17 +102,18 @@ function fetchImage(url, filename, extension, delayTime = 0) {
 }
 function saveAsCSV(entities) {
     const outputPath = './output/wikipedia.csv';
-    const output = fs.createWriteStream(outputPath, { encoding: 'utf8' });
+    const output = createWriteStream(outputPath, { encoding: 'utf8' });
     // note to self: careful, the following field names need to match the object property names!!!
     const fields = Object.getOwnPropertyNames(entities[0]);
     const json2csvOptions = { fields };
-    const asyncParser = new json2csv.AsyncParser(json2csvOptions);
+    // eslint-disable-next-line new-cap
+    const asyncParser = new AsyncParser(json2csvOptions);
     entities.forEach((entity) => {
         asyncParser.input.push(JSON.stringify(entity));
     });
     asyncParser.input.push(null);
     const parsingProcessor = asyncParser.toOutput(output);
-    chriswebUtilities.log('writing csv file done (you can find it in the folder called "output")', 'fontColor:green');
+    log('writing csv file done (you can find it in the folder called "output")', 'fontColor:green');
     return parsingProcessor.promise();
 }
 
@@ -146,29 +143,28 @@ getPage().then((data) => {
 
 });
 */
-getPage().then((data) => {
-    //console.log(data);
-    const entitiesPromise = scrapContent(data.body);
-    entitiesPromise.then((entities) => {
-        //console.log(entities);
-        // create the csv file
-        saveAsCSV(entities).then((response) => {
-            console.log(response);
-        }).catch((error) => {
-            console.log(error);
-        });
-        entities.forEach((entity, index) => {
-            const filteredName = chriswebUtilities.filterAlphaNumericPlus(entity.name, '');
-            const delayTime = index * 1000;
-            const fetchImagePromise = fetchImage(entity.image_url, filteredName, 'png', delayTime);
-            fetchImagePromise.then(() => {
-                return;
-            }).catch((error) => {
-                console.log(error);
-            });
-        });
+const data = await getPage();
+//console.log(data)
+const entities = await scrapContent(data.body);
+if (entities.length > 0) {
+    // create the csv file
+    saveAsCSV(entities).then((response) => {
+        console.log(response);
     }).catch((error) => {
         console.log(error);
     });
-});
+    entities.forEach(async (entity, index) => {
+        const filteredName = filterAlphaNumericPlus(entity.name, '');
+        const delayTime = index * 1000;
+        try {
+            await fetchImage(entity.image_url, filteredName, 'png', delayTime);
+        }
+        catch (error) {
+            console.log(error);
+        }
+    });
+}
+else {
+    console.log('no scrapped entities found');
+}
 //# sourceMappingURL=index.js.map

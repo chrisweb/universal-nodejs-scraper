@@ -2,13 +2,10 @@
     "root": true,
     "env": {
         "browser": true,
-        "node": false,
-        "es6": true
+        "es2021": true
     },
     "extends": [
-        "eslint:recommended",
-        "plugin:@typescript-eslint/eslint-recommended",
-        "plugin:@typescript-eslint/recommended"
+        "standard"
     ],
     "plugins": [
         "@typescript-eslint"
@@ -27,6 +24,16 @@
                     "match": true
                 }
             }
-        ]
+        ],
+        "spaced-comment": "off",
+        "indent": ["error", 4],
+        "padded-blocks": "off",
+        "comma-dangle": ["error", {
+            "arrays": "never",
+            "objects": "only-multiline",
+            "imports": "never",
+            "exports": "never",
+            "functions": "never"
+        }]
     }
 }

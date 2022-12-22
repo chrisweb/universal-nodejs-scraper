@@ -1,14 +1,9 @@
 {
   "compilerOptions": {
-    //"allowSyntheticDefaultImports": true,
-    //"esModuleInterop": true,
     "declaration": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    //"module": "CommonJS",
-    //"module": "ES6",
-    //"module": "ESNext",
-    "module": "ES2015",
+    "module": "ES2022",
     "moduleResolution": "node",
     "rootDir": "./src",
     "outDir": "dist",
@@ -25,7 +20,7 @@
       "esnext",
       "dom"
     ],
-    "target": "es6"
+    "target": "ES2020"
   },
   "exclude": [
     "node_modules",

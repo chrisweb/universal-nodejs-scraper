@@ -55,44 +55,38 @@ getDocument().then((data) => {
 // note: the flags displayed in the google sheet use the wikipedia URL, to use the downloaded images instead you need to host them on a server and alter the image url to match your server address
 
 // https://github.com/chrisweb/chrisweb-utilities.js
-import { filterAlphaNumericPlus } from 'chrisweb-utilities';
+import { filterAlphaNumericPlus } from 'chrisweb-utilities'
 
-import { getPage, scrapContent, saveAsCSV, fetchImage } from './library/wikipedia_with_images_sraper';
+import { getPage, scrapContent, saveAsCSV, fetchImage } from './library/wikipedia_with_images_sraper'
 
-getPage().then((data) => {
+const data = await getPage()
 
-    //console.log(data);
+//console.log(data)
 
-    const entitiesPromise = scrapContent(data.body);
+const entities = await scrapContent(data.body)
 
-    entitiesPromise.then((entities) => {
+if (entities.length > 0) {
 
-        //console.log(entities);
-
-        // create the csv file
-        saveAsCSV(entities).then((response) => {
-            console.log(response);
-        }).catch((error) => {
-            console.log(error);
-        });
-
-        entities.forEach((entity, index) => {
-
-            const filteredName = filterAlphaNumericPlus(entity.name, '') as string;
-            const delayTime = index*1000;
-
-            const fetchImagePromise = fetchImage(entity.image_url, filteredName, 'png', delayTime);
-
-            fetchImagePromise.then(() => {
-                return;
-            }).catch((error) => {
-                console.log(error);
-            });
-
-        });
-
+    // create the csv file
+    saveAsCSV(entities).then((response) => {
+        console.log(response)
     }).catch((error) => {
-        console.log(error);
-    });
+        console.log(error)
+    })
 
-});
+    entities.forEach(async (entity, index) => {
+
+        const filteredName = filterAlphaNumericPlus(entity.name, '') as string
+        const delayTime = index * 1000
+
+        try {
+            await fetchImage(entity.image_url, filteredName, 'png', delayTime)
+        } catch (error) {
+            console.log(error)
+        }
+
+    })
+
+} else {
+    console.log('no scrapped entities found')
+}
