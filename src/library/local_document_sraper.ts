@@ -2,7 +2,8 @@
 import { readFile, createWriteStream } from 'fs'
 
 // nodejs path module
-import * as path from 'path'
+import { dirname, join } from 'path'
+import { fileURLToPath } from 'url'
 
 // https://github.com/cheeriojs/cheerio
 import { load as cheerioLoad } from 'cheerio'
@@ -24,6 +25,8 @@ interface IEntity {
     third: string
 }
 
+const __dirname = dirname(fileURLToPath(import.meta.url))
+
 const scrapOptions: IScrapOptions = {
     saveAs: 'csv',
     documentName: 'local_document.html',
@@ -35,7 +38,7 @@ export function getDocument (scrapRequestOptions: IScrapOptions = scrapOptions):
 
         log('starting scrapping...', 'fontColor:yellow')
 
-        const filePath = path.join(__dirname, '../input/', scrapRequestOptions.documentName)
+        const filePath = join(__dirname, '../input/', scrapRequestOptions.documentName)
 
         readFile(filePath, { encoding: 'utf-8' }, function (error, data) {
 

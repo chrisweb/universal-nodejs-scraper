@@ -1,56 +1,52 @@
-/*
+
 // example 1: grab top hacker news articles, extract the title, rank and score, save data as csv file
-import { getPage, scrapContent, saveAsCSV } from './library/hacker-news_scraper';
+import { getPage, scrapContent, saveAsCSV } from './library/hacker-news_scraper'
 
-getPage().then((data) => {
+const data = await getPage()
 
-    //console.log(data);
+//console.log(data)
 
-    const articlesPromise = scrapContent(data.body);
+const articles = await scrapContent(data.body)
 
-    articlesPromise.then((articles) => {
+//console.log(articles)
 
-        //console.log(articles);
+if (articles.length > 0) {
 
-        saveAsCSV(articles).then((response) => {
-            console.log(response);
-        }).catch((error) => {
-            console.log(error);
-        });
-
+    saveAsCSV(articles).then((response) => {
+        console.log(response)
     }).catch((error) => {
-        console.log(error);
-    });
+        console.log(error)
+    })
 
-});
-*/
+} else {
+    console.log('no scrapped articles found')
+}
+
 /*
 // example 2: takes a local document that got downloaded previously and parses it based on defined rules
-import { getDocument, scrapContent, saveAsCSV } from './library/local_document_sraper';
+import { getDocument, scrapContent, saveAsCSV } from './library/local_document_sraper'
 
-getDocument().then((data) => {
+const data = await getDocument()
 
-    //console.log(response);
+//console.log(data)
 
-    const entitiesPromise = scrapContent(data);
+const entities = await scrapContent(data)
 
-    entitiesPromise.then((entities) => {
+//console.log(entities)
 
-        //console.log(articles);
+if (entities.length > 0) {
 
-        saveAsCSV(entities).then((response) => {
-            console.log(response);
-        }).catch((error) => {
-            console.log(error);
-        });
-
+    saveAsCSV(entities).then((response) => {
+        console.log(response)
     }).catch((error) => {
-        console.log(error);
-    });
+        console.log(error)
+    })
 
-});
+} else {
+    console.log('no scrapped articles found')
+}
 */
-
+/*
 // example 3: grad the wikipedia page containing the countries list, downloads each flag image and creates a csv with a google sheet image formula to display the flags
 // note: the flags displayed in the google sheet use the wikipedia URL, to use the downloaded images instead you need to host them on a server and alter the image url to match your server address
 
@@ -64,6 +60,8 @@ const data = await getPage()
 //console.log(data)
 
 const entities = await scrapContent(data.body)
+
+//console.log(entities)
 
 if (entities.length > 0) {
 
@@ -90,3 +88,4 @@ if (entities.length > 0) {
 } else {
     console.log('no scrapped entities found')
 }
+*/

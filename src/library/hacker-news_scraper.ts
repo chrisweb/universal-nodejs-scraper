@@ -96,8 +96,9 @@ export async function scrapContent (page: string): Promise<IArticle[]> {
     const $ = cheerioLoad(page)
 
     const $body = $('body')
-    const $mainContent = $body.find('#hnmain')
-    const $mainTable = $mainContent.find('table.itemlist > tbody')
+    // the articles table (as of now) is in the thirs <tr>
+    const $mainContent = $body.find('#hnmain tr:nth-child(3)')
+    const $mainTable = $mainContent.find('table > tbody')
     const $tableRows = $mainTable.children('tr')
 
     const articlesPromises: Promise<{ rank: number, title: string } | { score: number } | void>[] = []
@@ -108,12 +109,15 @@ export async function scrapContent (page: string): Promise<IArticle[]> {
 
             const $row = $(element)
 
+            //if (index > 3) return
+            //console.log($row)
+
             try {
 
                 // top news item row
                 if ($row.hasClass('athing')) {
                     const articleRank = parseInt($row.find('.rank').text())
-                    const articleTitle = $row.find('.storylink').text()
+                    const articleTitle = $row.find('.titleline > a').text()
                     resolve({ rank: articleRank, title: articleTitle })
                 }
 
@@ -146,11 +150,15 @@ export async function scrapContent (page: string): Promise<IArticle[]> {
     const articles: IArticle[] = []
 
     const articlesParts = await Promise.all(articlesPromises)
+
     let article: IArticle = {
         title: '',
         score: 0,
         rank: 0
     }
+
+    //console.log(articlesParts)
+
     for (const articleParts of articlesParts) {
 
         if (articleParts === undefined) {
@@ -174,7 +182,6 @@ export async function scrapContent (page: string): Promise<IArticle[]> {
     }
     log('extracting done', 'fontColor:green')
     return articles
-
 }
 
 export function saveAsCSV (articles: IArticle[]): Promise<string> {
