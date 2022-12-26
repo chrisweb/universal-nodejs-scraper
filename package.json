@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node ./dist/index.js",
     "build": "rollup -c ./scripts/dist.js",
-    "lint": "./node_modules/.bin/eslint src/**/*",
+    "lint": "npx eslint src/**/*",
     "watch": "rollup -cw ./scripts/dist.js"
   },
   "repository": {
