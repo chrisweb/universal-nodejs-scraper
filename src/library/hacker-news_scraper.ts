@@ -1,4 +1,4 @@
-﻿// nodejs https module
+// nodejs https module
 import * as https from 'https'
 
 // nodejs request module

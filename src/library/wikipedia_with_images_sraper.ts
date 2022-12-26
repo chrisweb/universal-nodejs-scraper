@@ -1,4 +1,4 @@
-﻿// nodejs request module
+// nodejs request module
 import { readFile, createWriteStream } from 'fs'
 
 // nodejs https module
