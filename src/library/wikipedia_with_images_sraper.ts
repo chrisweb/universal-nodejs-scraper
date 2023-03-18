@@ -1,4 +1,4 @@
-// nodejs request module
+﻿// nodejs request module
 import { readFile, createWriteStream } from 'fs'
 
 // nodejs https module
@@ -85,7 +85,7 @@ export async function scrapContent (data: string): Promise<IEntity[]> {
     const $items = $('table > tbody')
     const $tableRows = $items.children('tr')
 
-    console.log($tableRows)
+    //console.log($tableRows)
 
     const entitiesPromises: Promise<IEntity>[] = []
 
