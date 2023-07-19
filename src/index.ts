@@ -1,4 +1,3 @@
-
 // example 1: grab top hacker news articles, extract the title, rank and score, save data as csv file
 import { getPage, scrapContent, saveAsCSV } from './library/hacker-news_scraper'
 
